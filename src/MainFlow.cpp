@@ -68,6 +68,7 @@ void mainflow(){
     char dummy;
     int mission;
     MainFlow *myMainFlow = new MainFlow();
+
     //entered the size of the grid (map)
     cin >> gridXAxe >> gridYAxe;
     myMainFlow->createGrid(gridXAxe,gridYAxe);
