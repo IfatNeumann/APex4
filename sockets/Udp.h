@@ -48,7 +48,7 @@ public:
 	* The Function operation: getting data from the other socket and print *
 	* the data															   *
 	***********************************************************************/
-	int reciveData(char* buffer, int size);
+	int receiveData(char* buffer, int size);
 };
 
 #endif /* UDP_H_ */

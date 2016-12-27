@@ -8,7 +8,7 @@ set(SOURCE_FILES src/Point.h src/Point.cpp src/BFS.cpp src/BFS.h src/Node.cpp sr
         src/TripInfo.h src/TripInfo.cpp src/TaxiCenter.h src/TaxiCenter.cpp src/Cab.h src/Cab.cpp
         src/StandardCab.h src/StandardCab.cpp src/LuxuryCab.h src/LuxuryCab.cpp src/MainFlow.h
         src/MainFlow.cpp src/Color.h src/Manufacturer.h src/MaritalStatus.h src/Client.cpp src/Server.cpp
-        src/Socket.cpp src/Socket.h src/Udp.cpp src/Udp.h)
+        sockets/Socket.cpp sockets/Socket.h sockets/Udp.cpp sockets/Udp.h)
 add_executable(APex4 ${SOURCE_FILES})
 
 add_executable(Server src/Server.cpp)
