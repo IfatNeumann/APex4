@@ -89,5 +89,7 @@ public:
      * @return grid
      */
     Grid* getGrid();
+
+    void mainFlow();
 };
 #endif //APEX2_MAINFLOW_H
