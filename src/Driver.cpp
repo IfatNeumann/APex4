@@ -7,18 +7,33 @@
  */
 #include "Driver.h"
 
-Driver::Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, Cab* texiInfo,Node* currentPoint)
+Driver::Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, int taxiId,Node* currentPoint)
 {
     this->id=id;
     this->age=age;
     this->martialSta=martialSta;
     this->yrsOfExp=yrsOfExp;
     this->avgStsfc=0;
-    this->txCabInfo=texiInfo;
+    this->taxiId=taxiId;
     this->totalCustomersNum=0;
     this->currentPassen;
     this->myTripInfo=NULL;
     this->currentPoint=currentPoint;
+    this->ifAvailable = true;
+}
+
+Driver::Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, int taxiId)
+{
+    this->id=id;
+    this->age=age;
+    this->martialSta=martialSta;
+    this->yrsOfExp=yrsOfExp;
+    this->avgStsfc=0;
+    this->taxiId=taxiId;
+    this->totalCustomersNum=0;
+    this->currentPassen;
+    this->myTripInfo=NULL;
+    this->currentPoint;
     this->ifAvailable = true;
 }
 
@@ -52,8 +67,8 @@ int Driver::getYrsOfExp(){
 double Driver::getAvgStsfc(){
     return this->avgStsfc;
 }
-Cab* Driver::getTxCabInfo(){
-    return this->txCabInfo;
+int Driver::getTaxiId(){
+    return this->taxiId;
 }
 int Driver::getCustomersNum(){
     return this->totalCustomersNum;

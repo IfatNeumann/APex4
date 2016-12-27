@@ -21,7 +21,7 @@ private:
     MaritalStatus martialSta;
     int yrsOfExp;
     double avgStsfc;
-    Cab* txCabInfo;
+    int taxiId;
     int totalCustomersNum;
     vector<Passenger*> currentPassen;
     TripInfo* myTripInfo;
@@ -37,9 +37,10 @@ public:
  * @param age the age of the driver
  * @param martialSta the martial status of the driver
  * @param yrsOfExp number of years of experience
- * @param texiInfo pointer to the cab object that belongs to this driver
+ * @param taxiId the id of the cab object that belongs to this driver
  */
-    Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, Cab* texiInfo, Node* currentPoint);
+    Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, int taxiId, Node* currentPoint);
+    Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, int taxiId);
     /**
      * Destructor.
      */
@@ -75,10 +76,10 @@ public:
      */
     double getAvgStsfc();
     /**
-     * This function return a point to a cab object that belong to this driver.
-     * @return pointer to 'Cab'
+     * This function return the id of the cab object that belong to this driver.
+     * @return taxiId - the taxi's id
      */
-    Cab* getTxCabInfo();
+    int getTaxiId();
     /**
      * This function return the total number of customers that got a ride with this driver.
      * @return totalCustomersNum- variable from type int
