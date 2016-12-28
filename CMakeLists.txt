@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.6)
 project(APex4)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+
+set(BOOST_ROOT CACHE PATH "/usr/include/boost/")
+find_package(Boost 1.58.0 COMPONENTS serialization system)
+include_directories(${Boost_INCLUDE_DIR})
 
 set(core_sockets sockets/Socket.cpp sockets/Socket.h sockets/Udp.cpp sockets/Udp.h)
 add_library(sockets ${core_sockets})
@@ -21,5 +25,5 @@ set(SOURCE_FILES_SERVER src/Server.cpp src/Point.h src/Point.cpp src/BFS.cpp src
 add_executable(Server ${SOURCE_FILES_SERVER})
 add_executable(Client ${SOURCE_FILES_CLIENT})
 
-target_link_libraries(Server sockets)
-target_link_libraries(Client sockets)
+target_link_libraries(Server sockets ${Boost_LIBRARIES})
+target_link_libraries(Client sockets ${Boost_LIBRARIES})

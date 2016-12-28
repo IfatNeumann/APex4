@@ -15,6 +15,19 @@ private:
     bool isObstacle;
     Point neighbors[4];
     int numOfNeighbors;
+
+    friend class boost::serialization::access;
+
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & point;
+        ar & parent;
+        ar & visited;
+        ar & isObstacle;
+        ar & neighbors;
+        ar & numOfNeighbors;
+    }
 public:
     /*
     * constructor
