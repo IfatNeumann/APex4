@@ -56,10 +56,10 @@ int main() {
     boost::archive::binary_iarchive ia(s2);
     ia >> p2;
 
-    cout << *p2;
+    (*p2).printPoint();
 
-    delete driver;
-    delete driver2;
+    delete p;
+    delete p2;
 
     return 0;
 }
