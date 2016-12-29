@@ -16,6 +16,15 @@ private:
     Node* destination;
     double satisfaction;
 
+    friend class boost::serialization::access;
+
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & source;
+        ar & destination;
+        ar & satisfaction;
+    }
 public:
     Passenger();
     /**
