@@ -6,7 +6,7 @@
  * Trip information, And current point.
  */
 #include "Driver.h"
-
+Driver::Driver(){}
 Driver::Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, int taxiId,Node* currentPoint)
 {
     this->id=id;

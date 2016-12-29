@@ -34,7 +34,7 @@ private:
     }
 
 public:
-
+    TripInfo();
  /**
   * Constructor.
   * @param rideId the id of this ride (trip)

@@ -1,4 +1,5 @@
 #include "Passenger.h"
+Passenger::Passenger(){}
 Passenger::Passenger(Node* s, Node* d) {
     this->source = s;
     this->destination = d;

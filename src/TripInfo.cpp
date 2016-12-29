@@ -1,5 +1,5 @@
 #include "TripInfo.h"
-
+TripInfo::TripInfo(){}
 TripInfo::TripInfo(int rideId, Node* startingP, Node* endingP, int numOfPassen,double tariff)
 {
     this->rideId = rideId;

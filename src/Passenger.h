@@ -17,6 +17,7 @@ private:
     double satisfaction;
 
 public:
+    Passenger();
     /**
     * Constructor.
     * Gets the passenger's source point and destination point

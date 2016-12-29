@@ -12,6 +12,7 @@
 #include "Node.h"
 #include <vector>
 #include <cstdlib>
+#include <boost/serialization/vector.hpp>
 using namespace std;
 
 class Driver{
@@ -55,6 +56,7 @@ public:
  * @param yrsOfExp number of years of experience
  * @param taxiId the id of the cab object that belongs to this driver
  */
+    Driver();
     Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, int taxiId, Node* currentPoint);
     Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, int taxiId);
     /**

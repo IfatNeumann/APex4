@@ -40,7 +40,6 @@ int main() {
 //    }
 //    cout << "The server sent: " << buffer << endl;
 //    close(sock);
-    Driver p = client.createDriver();
     std::string serial_str;
     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
     boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
