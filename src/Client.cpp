@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <string.h>
 #include "Client.h"
+#include "../sockets/Udp.h"
 using namespace std;
 int main() {
     int id, age, experience, texiId;
@@ -14,31 +15,8 @@ int main() {
     Driver* p;
     //cin >> id >> dummy >> age >> dummy >> status >> dummy >> experience >> dummy >> texiId;
     p = client.createDriver(id, age, status, experience, texiId);
-//    const char* ip_address = "127.0.0.1";
-//    const int port_no = 5678;
-//    int sock = socket(AF_INET, SOCK_DGRAM, 0);
-//    if (sock < 0) {
-//        perror("error creating socket");
-//    }
-//    struct sockaddr_in sin;
-//    memset(&sin, 0, sizeof(sin));
-//    sin.sin_family = AF_INET;
-//    sin.sin_addr.s_addr = inet_addr(ip_address);
-//    sin.sin_port = htons(port_no);
-//    char data[] = "hello";
-//    int data_len = sizeof(data);
-//    int sent_bytes = sendto(sock, data, data_len, 0, (struct sockaddr *) &sin, sizeof(sin));
-//    if (sent_bytes < 0) {
-//        perror("error writing to socket");
-//    }
-//    struct sockaddr_in from;
-//    unsigned int from_len = sizeof(struct sockaddr_in);
-//    char buffer[4096];
-//    int bytes = recvfrom(sock, buffer, sizeof(buffer), 0, (struct sockaddr *) &from, &from_len);
-//    if (bytes < 0) {
-//        perror("error reading from socket");
-//    }
-//    cout << "The server sent: " << buffer << endl;
+    Socket* socket= new Udp(false,5006);
+    socket->initialize();
 //    close(sock);
     std::string serial_str;
     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
