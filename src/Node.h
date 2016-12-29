@@ -29,6 +29,7 @@ private:
         ar & numOfNeighbors;
     }
 public:
+    Node();
     /*
     * constructor
     * gets two integers and put them in x,y members of the node's point

@@ -1,7 +1,9 @@
 #include "Node.h"
 #include <iostream> //for the NULL
 #include <stdexcept>
+Node::Node(){
 
+}
 Node::Node(int x,int y){
     point.setX(x);
     point.setY(y);

@@ -11,9 +11,9 @@ int main() {
     int id, age, experience, texiId;
     char status,dummy;
     Client client;
-    Driver* driver;
-    cin >> id >> dummy >> age >> dummy >> status >> dummy >> experience >> dummy >> texiId;
-    driver = client.createDriver(id, age, status, experience, texiId);
+    Driver* p;
+    //cin >> id >> dummy >> age >> dummy >> status >> dummy >> experience >> dummy >> texiId;
+    p = client.createDriver(id, age, status, experience, texiId);
 //    const char* ip_address = "127.0.0.1";
 //    const int port_no = 5678;
 //    int sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -40,7 +40,7 @@ int main() {
 //    }
 //    cout << "The server sent: " << buffer << endl;
 //    close(sock);
-    Point* p = new Point(2,3);
+    Driver p = client.createDriver();
     std::string serial_str;
     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
     boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
@@ -50,13 +50,11 @@ int main() {
 
     cout << serial_str << endl;
 
-    Point *p2;
+    Driver *p2;
     boost::iostreams::basic_array_source<char> device(serial_str.c_str(), serial_str.size());
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
     boost::archive::binary_iarchive ia(s2);
     ia >> p2;
-
-    (*p2).printPoint();
 
     delete p;
     delete p2;
