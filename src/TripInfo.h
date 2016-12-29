@@ -19,6 +19,19 @@ private:
     int numOfPassen;
     double tariff;
     bool haveDriver;
+    friend class boost::serialization::access;
+
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & rideId;
+        ar & totalMetersPassed;
+        ar & startingP;
+        ar & endingP;
+        ar & numOfPassen;
+        ar & tariff;
+        ar & haveDriver;
+    }
 
 public:
 

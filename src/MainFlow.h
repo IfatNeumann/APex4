@@ -21,6 +21,15 @@ private:
     TaxiCenter* myTaxiCenter;
     Grid* grid;
     vector<Cab*> cabsVector;
+    friend class boost::serialization::access;
+
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & myTaxiCenter;
+        ar & grid;
+        ar & cabsVector;
+    }
 
 public:
     /**
