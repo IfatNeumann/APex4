@@ -8,6 +8,6 @@ private:
     Driver* driver;
 public:
 
-        void createDriver(int id, int age, char status, int experience, int texiId);
+        Driver* createDriver(int id, int age, char status, int experience, int texiId);
 };
 #endif //APEX4_CLIENT_H

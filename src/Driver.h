@@ -27,7 +27,23 @@ private:
     TripInfo* myTripInfo;
     Node* currentPoint;
     bool ifAvailable;
+    friend class boost::serialization::access;
 
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id;
+        ar & age;
+        ar & martialSta;
+        ar & yrsOfExp;
+        ar & avgStsfc;
+        ar & taxiId;
+        ar & totalCustomersNum;
+        ar & currentPassen;
+        ar & myTripInfo;
+        ar & currentPoint;
+        ar & ifAvailable;
+    }
 public:
     /**
      * Constructor.
