@@ -59,6 +59,14 @@ Grid* MainFlow::getGrid(){
     return this->grid;
 }
 
+Cab* MainFlow::getCab(int texiId) {
+    for(int i=0;i<this->cabsVector.size();i++){
+        if(this->cabsVector[i]->getId()==texiId){
+            return this->cabsVector[i];
+        }
+    }
+}
+
 void MainFlow::mainFlow(){
     int time=0;
     int gridXAxe,gridYAxe,numOfObstacles;
@@ -66,7 +74,7 @@ void MainFlow::mainFlow(){
     char dummy;
     int mission;
     char* buffer;
-    Socket* socket= new Udp(false,5006);
+    Socket* socket= new Udp(true,5006);
     socket->initialize();
 
     std::string serial_str;
@@ -106,27 +114,29 @@ void MainFlow::mainFlow(){
             case 1: {
                 int numOfDrivers;
                 cin >> numOfDrivers;
-                while(numOfDrivers){
+                while(numOfDrivers) {
                     //receive the driver
-                    socket->receiveData(buffer,4096);
+                    socket->receiveData(buffer, 4096);
                     Driver *driver;
                     boost::iostreams::basic_array_source<char> device(buffer, 4096);
                     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
                     boost::archive::binary_iarchive ia(s2);
                     ia >> driver;
+                    this->myTaxiCenter->addDriver(driver);
+                    //find the taxi
+                    Cab* taxi = this->getCab(driver->getTaxiId());
+                    //send the taxi
 
+                    std::string serial_str;
+                    boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+                    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
+                    boost::archive::binary_oarchive oa(s);
+                    oa << taxi;
+                    s.flush();
+                    socket->sendData(serial_str);
                     numOfDrivers--;
+                    break;
                 }
-                //find the taxi
-
-                //send the taxi
-                std::string serial_str;
-                boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-                boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
-                boost::archive::binary_oarchive oa(s);
-                oa << p;
-                s.flush();
-                break;
             }
                 //this mission is for creating and adding a new trip to the game
             case 2: {

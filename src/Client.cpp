@@ -10,11 +10,11 @@
 using namespace std;
 int main() {
     int id, age, experience, taxiId;
-    char status,dummy;
+    char status,dummy,*buffer;
     Client client;
-    Driver* p;
+    Driver* driver;
     cin >> id >> dummy >> age >> dummy >> status >> dummy >> experience >> dummy >> taxiId;
-    p = client.createDriver(id, age, status, experience, taxiId);
+    driver = client.createDriver(id, age, status, experience, taxiId);
     Socket* socket= new Udp(false,5006);
     socket->initialize();
 
@@ -22,22 +22,25 @@ int main() {
     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
     boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
     boost::archive::binary_oarchive oa(s);
-    oa << p;
+    oa << driver;
     s.flush();
+    socket->sendData(serial_str);
 
-    cout << serial_str << endl;
-
-    Driver *p2;
+    socket->receiveData(buffer, 4096);
+    Cab *taxi;
     boost::iostreams::basic_array_source<char> device(serial_str.c_str(), serial_str.size());
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
     boost::archive::binary_iarchive ia(s2);
-    ia >> p2;
+    ia >> taxi;
+
+
     delete socket;
-    delete p;
-    delete p2;
+    delete driver;
+    delete taxi;
 
     return 0;
 }
+
 
 Driver* Client::createDriver(int id,int age,char status,int experience,int taxiId){
     MaritalStatus maritalStatus =MaritalStatus (status);
