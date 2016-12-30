@@ -1,4 +1,13 @@
 #include "MainFlow.h"
+#include <iostream>
+#include <sys/socket.h>
+#include <stdio.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <string.h>
+#include "Client.h"
+#include "../sockets/Udp.h"
 
 MainFlow::MainFlow(){
     this->myTaxiCenter = new TaxiCenter();
@@ -51,10 +60,33 @@ Grid* MainFlow::getGrid(){
 }
 
 void MainFlow::mainFlow(){
+    int time=0;
     int gridXAxe,gridYAxe,numOfObstacles;
     int xPoint,yPoint;
     char dummy;
     int mission;
+    char* buffer;
+    Socket* socket= new Udp(false,5006);
+    socket->initialize();
+
+    std::string serial_str;
+    boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
+    boost::archive::binary_oarchive oa(s);
+    oa << p;
+    s.flush();
+
+    cout << serial_str << endl;
+
+    Driver *p2;
+    boost::iostreams::basic_array_source<char> device(serial_str.c_str(), serial_str.size());
+    boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
+    boost::archive::binary_iarchive ia(s2);
+    ia >> p2;
+    delete socket;
+    delete p;
+    delete p2;
+
     //entered the size of the grid (map)
     cin >> gridXAxe >> gridYAxe;
     this->createGrid(gridXAxe,gridYAxe);
@@ -70,11 +102,30 @@ void MainFlow::mainFlow(){
     do{
         cin>>mission;
         switch (mission) {
-            //this mission is for creating and adding a new cab to the game
+            //this mission is for creating and adding a new driver to the game
             case 1: {
-                int id, age, experience, texiId;
-                char status;
-                cin >> id >> dummy >> age >> dummy >> status >> dummy >> experience >> dummy >> texiId;
+                int numOfDrivers;
+                cin >> numOfDrivers;
+                while(numOfDrivers){
+                    //receive the driver
+                    socket->receiveData(buffer,4096);
+                    Driver *driver;
+                    boost::iostreams::basic_array_source<char> device(buffer, 4096);
+                    boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
+                    boost::archive::binary_iarchive ia(s2);
+                    ia >> driver;
+
+                    numOfDrivers--;
+                }
+                //find the taxi
+
+                //send the taxi
+                std::string serial_str;
+                boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+                boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
+                boost::archive::binary_oarchive oa(s);
+                oa << p;
+                s.flush();
                 break;
             }
                 //this mission is for creating and adding a new trip to the game
@@ -108,6 +159,11 @@ void MainFlow::mainFlow(){
             case 6: {
                 this->getTaxiCenter()->connectDriversToTrips();
                 this->getTaxiCenter()->startDriving();
+                break;
+            }
+            //this mission increase the time by one
+            case 9: {
+                time++;
                 break;
             }
         }

@@ -23,6 +23,7 @@ private:
     int yrsOfExp;
     double avgStsfc;
     int taxiId;
+    Cab* txCabInfo;
     int totalCustomersNum;
     vector<Passenger*> currentPassen;
     TripInfo* myTripInfo;
