@@ -77,24 +77,6 @@ void MainFlow::mainFlow(){
     Socket* socket= new Udp(true,5006);
     socket->initialize();
 
-    std::string serial_str;
-    boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
-    boost::archive::binary_oarchive oa(s);
-    oa << p;
-    s.flush();
-
-    cout << serial_str << endl;
-
-    Driver *p2;
-    boost::iostreams::basic_array_source<char> device(serial_str.c_str(), serial_str.size());
-    boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
-    boost::archive::binary_iarchive ia(s2);
-    ia >> p2;
-    delete socket;
-    delete p;
-    delete p2;
-
     //entered the size of the grid (map)
     cin >> gridXAxe >> gridYAxe;
     this->createGrid(gridXAxe,gridYAxe);

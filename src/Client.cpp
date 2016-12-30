@@ -32,7 +32,7 @@ int main() {
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
     boost::archive::binary_iarchive ia(s2);
     ia >> taxi;
-
+    driver->setTaxi(taxi);
 
     delete socket;
     delete driver;

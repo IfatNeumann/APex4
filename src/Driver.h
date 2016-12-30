@@ -58,7 +58,7 @@ public:
  * @param taxiId the id of the cab object that belongs to this driver
  */
     Driver();
-    Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, int taxiId, Node* currentPoint);
+    Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, Cab* texiInfo, Node* currentPoint);
     Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, int taxiId);
     /**
      * Destructor.
@@ -158,5 +158,6 @@ public:
      * This function clear the list of the passengers
      */
     void clearList();
+    void setTaxi(Cab* cab);
 };
 #endif //APEX1_DRIVER_H
