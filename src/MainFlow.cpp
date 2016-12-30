@@ -86,7 +86,7 @@ void MainFlow::mainFlow(){
                 this->createTripInfo(tripId, xStartPoint, yStartPoint, xEndPoint, yEndPoint, numOfpassn, tariff);
                 break;
             }
-                //this mission is for creating and adding a new driver to the game
+            //this mission is for creating and adding a new vehicle to the game
             case 3: {
                 int idTaxi;
                 int typeOfTaxi;

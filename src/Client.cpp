@@ -9,15 +9,15 @@
 #include "../sockets/Udp.h"
 using namespace std;
 int main() {
-    int id, age, experience, texiId;
+    int id, age, experience, taxiId;
     char status,dummy;
     Client client;
     Driver* p;
-    //cin >> id >> dummy >> age >> dummy >> status >> dummy >> experience >> dummy >> texiId;
-    p = client.createDriver(id, age, status, experience, texiId);
+    cin >> id >> dummy >> age >> dummy >> status >> dummy >> experience >> dummy >> taxiId;
+    p = client.createDriver(id, age, status, experience, taxiId);
     Socket* socket= new Udp(false,5006);
     socket->initialize();
-//    close(sock);
+
     std::string serial_str;
     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
     boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
@@ -32,7 +32,7 @@ int main() {
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
     boost::archive::binary_iarchive ia(s2);
     ia >> p2;
-
+    delete socket;
     delete p;
     delete p2;
 
