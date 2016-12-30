@@ -10,6 +10,7 @@ using namespace std;
 int main() {
 
     MainFlow* mainflow = new MainFlow();
+    mainflow->mainFlow();
 
 //    const int server_port = 5678;
 //    int sock = socket(AF_INET, SOCK_DGRAM, 0);
