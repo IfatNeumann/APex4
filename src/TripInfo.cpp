@@ -1,6 +1,6 @@
 #include "TripInfo.h"
 TripInfo::TripInfo(){}
-TripInfo::TripInfo(int rideId, Node* startingP, Node* endingP, int numOfPassen,double tariff)
+TripInfo::TripInfo(int rideId, Node* startingP, Node* endingP, int numOfPassen,double tariff, int timeOfStart)
 {
     this->rideId = rideId;
     this->totalMetersPassed = 0;
@@ -9,6 +9,7 @@ TripInfo::TripInfo(int rideId, Node* startingP, Node* endingP, int numOfPassen,d
     this->numOfPassen = numOfPassen;
     this->tariff = tariff;
     this->haveDriver = false;
+    this->timeOfStart = timeOfStart;
 }
 
 TripInfo::~TripInfo() {

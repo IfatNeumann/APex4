@@ -45,9 +45,9 @@ void MainFlow::createCab(int idTaxi,int typeOfTaxi,char manufacturer,char color)
 }
 
 void MainFlow::createTripInfo(int tripId, int xStartPoint,int yStartPoint, int xEndPoint, int yEndPoint,
-                                   int numOfpassn, double tariff){
+                                   int numOfpassn, double tariff, int timeOfStart){
     TripInfo* newTrip = new TripInfo(tripId,grid->getNode(Point(xStartPoint,yStartPoint)),
-                                     grid->getNode(Point(xEndPoint,yEndPoint)),numOfpassn,tariff);
+                                     grid->getNode(Point(xEndPoint,yEndPoint)),numOfpassn,tariff, timeOfStart);
     this->myTaxiCenter->addTrip(newTrip);
 }
 
@@ -122,11 +122,11 @@ void MainFlow::mainFlow(){
             }
                 //this mission is for creating and adding a new trip to the game
             case 2: {
-                int tripId, xStartPoint, yStartPoint, xEndPoint, yEndPoint, numOfpassn;
+                int tripId, xStartPoint, yStartPoint, xEndPoint, yEndPoint, numOfpassn,timeOfStart;
                 double tariff;
                 cin >> tripId >> dummy >> xStartPoint >> dummy >> yStartPoint >> dummy >> xEndPoint >> dummy >> yEndPoint >>
-                    dummy >> numOfpassn >> dummy >> tariff;
-                this->createTripInfo(tripId, xStartPoint, yStartPoint, xEndPoint, yEndPoint, numOfpassn, tariff);
+                    dummy >> numOfpassn >> dummy >> tariff >> timeOfStart;
+                this->createTripInfo(tripId, xStartPoint, yStartPoint, xEndPoint, yEndPoint, numOfpassn, tariff, timeOfStart);
                 break;
             }
             //this mission is for creating and adding a new vehicle to the game

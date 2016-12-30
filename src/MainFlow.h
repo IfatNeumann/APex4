@@ -80,7 +80,7 @@ public:
      * @param tariff the tariff of the current trip
      */
     void createTripInfo(int tripId, int xStartPoint,int yStartPoint, int xEndPoint, int yEndPoint,int numOfpassn,
-    double tariff);
+    double tariff, int timeOfStart);
 
     /**
      * This function creates a grid based on the given information.

@@ -19,6 +19,7 @@ private:
     int numOfPassen;
     double tariff;
     bool haveDriver;
+    int timeOfStart;
     friend class boost::serialization::access;
 
     template<class Archive>
@@ -31,6 +32,7 @@ private:
         ar & numOfPassen;
         ar & tariff;
         ar & haveDriver;
+        ar & timeOfStart;
     }
 
 public:
@@ -43,7 +45,7 @@ public:
   * @param numOfPassen the number of the passengers in this trip
   * @param tariff the tariff to this trip
   */
-    TripInfo(int rideId, Node *startingP, Node *endingP, int numOfPassen, double tariff);
+    TripInfo(int rideId, Node *startingP, Node *endingP, int numOfPassen, double tariff, int timeOfStart);
 
     /**
      * Destructor.
