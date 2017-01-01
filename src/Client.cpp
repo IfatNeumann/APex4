@@ -40,9 +40,18 @@ int main() {
     ia >> taxi;
     driver->setTaxi(taxi);
 
+    dataSize=socket->reciveData(buffer, 4096);
+    TripInfo *tripInfo;
+    boost::iostreams::basic_array_source<char> device2(buffer, dataSize);
+    boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s3(device);
+    boost::archive::binary_iarchive ib(s3);
+    ib >> tripInfo;
+    driver->setMyTripInfo(tripInfo);
+
     delete socket;
     delete driver;
     delete taxi;
+    delete tripInfo;
 
     return 0;
 }

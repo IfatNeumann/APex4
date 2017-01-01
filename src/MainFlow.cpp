@@ -67,6 +67,8 @@ Cab* MainFlow::getCab(int texiId) {
     }
 }
 
+
+
 void MainFlow::mainFlow(){
     int time=0;
     int gridXAxe,gridYAxe,numOfObstacles;
@@ -116,6 +118,17 @@ void MainFlow::mainFlow(){
                     oa << taxi;
                     s.flush();
                     socket->sendData(serial_str);
+
+                    //find the taxi
+                    //TripInfo* tripInfo = this->myTaxiCenter->get
+                    //send the tripInfo
+                    std::string serial_str2;
+                    boost::iostreams::back_insert_device<std::string> inserter2(serial_str2);
+                    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s3(inserter2);
+                    boost::archive::binary_oarchive ob(s3);
+                    ob << taxi;
+                    s.flush();
+                    socket->sendData(serial_str2);
                     numOfDrivers--;
                     break;
                 }
