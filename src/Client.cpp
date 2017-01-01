@@ -26,7 +26,7 @@ int main() {
     s.flush();
     socket->sendData(serial_str);
 
-    socket->receiveData(buffer, 4096);
+    socket->reciveData(buffer, 4096);
     Cab *taxi;
     boost::iostreams::basic_array_source<char> device(serial_str.c_str(), serial_str.size());
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
