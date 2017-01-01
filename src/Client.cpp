@@ -15,7 +15,8 @@ BOOST_CLASS_EXPORT_GUID(LuxuryCab,"LuxuryCab")
 using namespace std;
 int main() {
     int id, age, experience, taxiId;
-    char status,dummy,*buffer;
+    char status,dummy;
+    char buffer[4096];
     Client client;
     Driver* driver;
     cin >> id >> dummy >> age >> dummy >> status >> dummy >> experience >> dummy >> taxiId;

@@ -135,31 +135,7 @@ void MainFlow::mainFlow(){
                 int typeOfTaxi;
                 char manufacturer, color;
                 cin >> idTaxi >> dummy >> typeOfTaxi >> dummy >> manufacturer >> dummy >> color;
-                //this->createCab(idTaxi, typeOfTaxi, manufacturer, color);
-
-                //serialize check
-                Cab *gp = new StandardCab(idTaxi, typeOfTaxi, Manufacturer
-                        (manufacturer), Color (color));
-                std::string serial_str;
-                boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-                boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
-                boost::archive::binary_oarchive oa(s);
-                oa << gp;
-                s.flush();
-
-                cout << serial_str << endl;
-
-                Cab *gp2;
-                boost::iostreams::basic_array_source<char> device(serial_str.c_str(), serial_str.size());
-                boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
-                boost::archive::binary_iarchive ia(s2);
-                ia >> gp2;
-
-
-                delete gp;
-                delete gp2;
-
-                //end of serialize check
+                this->createCab(idTaxi, typeOfTaxi, manufacturer, color);
                 break;
             }
                 // this mission is for printing the current point of specific driver
