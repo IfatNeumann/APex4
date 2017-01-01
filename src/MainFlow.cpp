@@ -125,7 +125,7 @@ void MainFlow::mainFlow(){
                 int tripId, xStartPoint, yStartPoint, xEndPoint, yEndPoint, numOfpassn,timeOfStart;
                 double tariff;
                 cin >> tripId >> dummy >> xStartPoint >> dummy >> yStartPoint >> dummy >> xEndPoint >> dummy >> yEndPoint >>
-                    dummy >> numOfpassn >> dummy >> tariff >> timeOfStart;
+                    dummy >> numOfpassn >> dummy >> tariff >> dummy >> timeOfStart;
                 this->createTripInfo(tripId, xStartPoint, yStartPoint, xEndPoint, yEndPoint, numOfpassn, tariff, timeOfStart);
                 break;
             }
