@@ -98,9 +98,9 @@ void MainFlow::mainFlow(){
                 cin >> numOfDrivers;
                 while(numOfDrivers) {
                     //receive the driver
-                    socket->reciveData(buffer, 4096);
+                    int dataSize=socket->reciveData(buffer, 4096);
                     Driver *driver;
-                    boost::iostreams::basic_array_source<char> device(buffer, 4096);
+                    boost::iostreams::basic_array_source<char> device(buffer,dataSize);
                     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
                     boost::archive::binary_iarchive ia(s2);
                     ia >> driver;
