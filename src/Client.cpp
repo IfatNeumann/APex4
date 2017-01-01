@@ -7,6 +7,11 @@
 #include <string.h>
 #include "Client.h"
 #include "../sockets/Udp.h"
+#include "StandardCab.h"
+#include "LuxuryCab.h"
+#include <boost/serialization/export.hpp>
+BOOST_CLASS_EXPORT_GUID(StandardCab,"StandardCab")
+BOOST_CLASS_EXPORT_GUID(LuxuryCab,"LuxuryCab")
 using namespace std;
 int main() {
     int id, age, experience, taxiId;

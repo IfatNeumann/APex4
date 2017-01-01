@@ -1,5 +1,5 @@
 #include "Cab.h"
-
+Cab::Cab(){}
 Cab::Cab(int cabId,int standardOrLuxuryCab,Manufacturer cabManufacturer, Color cabColor){
     id = cabId;
     totalKMPassed = 0;
