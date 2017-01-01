@@ -114,4 +114,4 @@ void Driver::clearList(){
 
 void Driver::setTaxi(Cab* cab){
     this->txCabInfo=cab;
-}
+};
