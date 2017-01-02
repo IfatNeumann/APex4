@@ -53,8 +53,8 @@ void MainFlow::createTripInfo(int tripId, int xStartPoint,int yStartPoint, int x
 
 void MainFlow::createGrid(int gridX,int gridY){
     this->grid = new Grid(gridX,gridY);
-    this->myTaxiCenter->setMyGrid(this->grid);
-    }
+    return;
+}
 Grid* MainFlow::getGrid(){
     return this->grid;
 }
@@ -67,15 +67,7 @@ Cab* MainFlow::getCab(int texiId) {
     }
 }
 
-void MainFlow::checkIfTimeToTrip(int time){
-    for(int i=0; i<this->myTaxiCenter->getTripsVector().size();i++) {
-        if(this->myTaxiCenter->getTripsVector().at(i)->getTimeOfStart()==time&&
-                this->myTaxiCenter->getTripsVector().at(i)->getHaveDriver()== false&&
-                this->myTaxiCenter->getTripsVector().at(i)!=NULL){
-            this->myTaxiCenter->connectDriversToTrips(i);
-        }
-    }
-}
+
 
 void MainFlow::mainFlow(){
     int time=0;
@@ -108,9 +100,9 @@ void MainFlow::mainFlow(){
                 cin >> numOfDrivers;
                 while(numOfDrivers) {
                     //receive the driver
-                    socket->reciveData(buffer, 4096);
+                    int dataSize=socket->reciveData(buffer, 4096);
                     Driver *driver;
-                    boost::iostreams::basic_array_source<char> device(buffer, 4096);
+                    boost::iostreams::basic_array_source<char> device(buffer,dataSize);
                     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
                     boost::archive::binary_iarchive ia(s2);
                     ia >> driver;
@@ -126,6 +118,17 @@ void MainFlow::mainFlow(){
                     oa << taxi;
                     s.flush();
                     socket->sendData(serial_str);
+
+                    //find the taxi
+                    //TripInfo* tripInfo = this->myTaxiCenter->get
+                    //send the tripInfo
+                    std::string serial_str2;
+                    boost::iostreams::back_insert_device<std::string> inserter2(serial_str2);
+                    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s3(inserter2);
+                    boost::archive::binary_oarchive ob(s3);
+                    ob << taxi;
+                    s.flush();
+                    socket->sendData(serial_str2);
                     numOfDrivers--;
                     break;
                 }
@@ -159,15 +162,13 @@ void MainFlow::mainFlow(){
             }
                 //this mission is fpr make the move of the drivers that holds a trip
             case 6: {
-                //this->getTaxiCenter()->connectDriversToTrips();
+                this->getTaxiCenter()->connectDriversToTrips();
                 this->getTaxiCenter()->startDriving();
                 break;
             }
             //this mission increase the time by one
             case 9: {
                 time++;
-                checkIfTimeToTrip(time);
-                this->getTaxiCenter()->startDriving();
                 break;
             }
         }

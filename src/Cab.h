@@ -36,6 +36,7 @@ protected:
         ar & totalKMPassed;
     }
     public:
+    Cab();
     /**
      * Constructor.
      * Gets its members' information from the Cab's constructor.

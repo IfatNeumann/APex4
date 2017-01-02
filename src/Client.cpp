@@ -7,10 +7,16 @@
 #include <string.h>
 #include "Client.h"
 #include "../sockets/Udp.h"
+#include "StandardCab.h"
+#include "LuxuryCab.h"
+#include <boost/serialization/export.hpp>
+BOOST_CLASS_EXPORT_GUID(StandardCab,"StandardCab")
+BOOST_CLASS_EXPORT_GUID(LuxuryCab,"LuxuryCab")
 using namespace std;
 int main() {
     int id, age, experience, taxiId;
-    char status,dummy,*buffer;
+    char status,dummy;
+    char buffer[4096];
     Client client;
     Driver* driver;
     cin >> id >> dummy >> age >> dummy >> status >> dummy >> experience >> dummy >> taxiId;
@@ -26,17 +32,26 @@ int main() {
     s.flush();
     socket->sendData(serial_str);
 
-    socket->reciveData(buffer, 4096);
+    int dataSize=socket->reciveData(buffer, 4096);
     Cab *taxi;
-    boost::iostreams::basic_array_source<char> device(serial_str.c_str(), serial_str.size());
+    boost::iostreams::basic_array_source<char> device(buffer, dataSize);
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
     boost::archive::binary_iarchive ia(s2);
     ia >> taxi;
     driver->setTaxi(taxi);
 
+    dataSize=socket->reciveData(buffer, 4096);
+    TripInfo *tripInfo;
+    boost::iostreams::basic_array_source<char> device2(buffer, dataSize);
+    boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s3(device);
+    boost::archive::binary_iarchive ib(s3);
+    ib >> tripInfo;
+    driver->setMyTripInfo(tripInfo);
+
     delete socket;
     delete driver;
     delete taxi;
+    delete tripInfo;
 
     return 0;
 }

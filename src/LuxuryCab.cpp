@@ -1,5 +1,5 @@
 #include "LuxuryCab.h"
-
+LuxuryCab::LuxuryCab(){}
 LuxuryCab::LuxuryCab(int cabId,int standardOrLuxuryCab,Manufacturer cabManufacturer, Color cabColor) :
         Cab(cabId,standardOrLuxuryCab,cabManufacturer,cabColor)  {}
 

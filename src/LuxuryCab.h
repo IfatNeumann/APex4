@@ -18,6 +18,7 @@ class LuxuryCab : public Cab {
         ar & boost::serialization::base_object<Cab>(*this);
     }
 public:
+    LuxuryCab();
     /**
     * Constructor.
     * Gets its members' information from the Cab's constructor.
