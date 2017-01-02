@@ -104,6 +104,7 @@ public:
      */
     void startDriving();
     void deleteTripThatEnd(int indexOfTrip);
+    Node* getTheNextNode(int indexOfDriver);
 };
 
 #endif //APEX2_TAXICENTER_H

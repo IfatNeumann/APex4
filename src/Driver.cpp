@@ -80,7 +80,10 @@ TripInfo* Driver::getMyTripInfo(){
 Node* Driver::getCurrentPoint() {
     return currentPoint;
 }
-bool Driver::getifAvailable(){
+Cab* Driver::getTxCabInfo() {
+    return this->txCabInfo;
+}
+bool Driver::getIfAvailable(){
     return this->ifAvailable;
 }
 void Driver::setAvgStsfc() {
@@ -111,7 +114,6 @@ void Driver::clearList(){
     }
 }
 
-
-void Driver::setTaxi(Cab* cab){
+void Driver::setTxCabInfo(Cab* cab){
     this->txCabInfo=cab;
 }

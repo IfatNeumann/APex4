@@ -114,11 +114,12 @@ public:
      * @return pointer to Node object
      */
     Node* getCurrentPoint();
+    Cab* getTxCabInfo();
     /**
      * This function return true or false accordingly the availability of the driver to get a new ride.
      * @return true or false
      */
-    bool getifAvailable();
+    bool getIfAvailable();
     /**
      * This function will use us for the next exercises, it will get and calculate the average of the passengers
      * satisfaction.
@@ -158,6 +159,6 @@ public:
      * This function clear the list of the passengers
      */
     void clearList();
-    void setTaxi(Cab* cab);
+    void setTxCabInfo(Cab* cab);
 };
 #endif //APEX1_DRIVER_H

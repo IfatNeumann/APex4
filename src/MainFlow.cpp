@@ -53,8 +53,8 @@ void MainFlow::createTripInfo(int tripId, int xStartPoint,int yStartPoint, int x
 
 void MainFlow::createGrid(int gridX,int gridY){
     this->grid = new Grid(gridX,gridY);
-    return;
-}
+    this->myTaxiCenter->setMyGrid(this->grid);
+    }
 Grid* MainFlow::getGrid(){
     return this->grid;
 }
@@ -67,16 +67,26 @@ Cab* MainFlow::getCab(int texiId) {
     }
 }
 
+int MainFlow::checkIfTimeToTrip(int time){
+    for(int i=0; i<this->myTaxiCenter->getTripsVector().size();i++) {
+        if(this->myTaxiCenter->getTripsVector().at(i)->getTimeOfStart()==time&&
+                this->myTaxiCenter->getTripsVector().at(i)->getHaveDriver()== false&&
+                this->myTaxiCenter->getTripsVector().at(i)!=NULL){
+            this->myTaxiCenter->connectDriversToTrips(i);
+            return i;
+        }
+    }
+    return -1;
+}
 
-
-void MainFlow::mainFlow(){
+void MainFlow::mainFlow(int portNum){
     int time=0;
     int gridXAxe,gridYAxe,numOfObstacles;
     int xPoint,yPoint;
     char dummy;
     int mission;
-    char* buffer;
-    Socket* socket= new Udp(true,5006);
+    char buffer[4096];
+    Socket* socket= new Udp(true,portNum);
     socket->initialize();
 
     //entered the size of the grid (map)
@@ -102,15 +112,13 @@ void MainFlow::mainFlow(){
                     //receive the driver
                     int dataSize=socket->reciveData(buffer, 4096);
                     Driver *driver;
-                    boost::iostreams::basic_array_source<char> device(buffer,dataSize);
+                    boost::iostreams::basic_array_source<char> device(buffer, dataSize);
                     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
                     boost::archive::binary_iarchive ia(s2);
                     ia >> driver;
-                    this->myTaxiCenter->addDriver(driver);
                     //find the taxi
                     Cab* taxi = this->getCab(driver->getTaxiId());
                     //send the taxi
-
                     std::string serial_str;
                     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
                     boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
@@ -118,17 +126,13 @@ void MainFlow::mainFlow(){
                     oa << taxi;
                     s.flush();
                     socket->sendData(serial_str);
-
-                    //find the taxi
-                    //TripInfo* tripInfo = this->myTaxiCenter->get
-                    //send the tripInfo
-                    std::string serial_str2;
-                    boost::iostreams::back_insert_device<std::string> inserter2(serial_str2);
-                    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s3(inserter2);
-                    boost::archive::binary_oarchive ob(s3);
-                    ob << taxi;
-                    s.flush();
-                    socket->sendData(serial_str2);
+                    //receive driver *with* his cab object
+                    dataSize = socket->reciveData(buffer,4096);
+                    boost::iostreams::basic_array_source<char> device6(buffer,dataSize);
+                    boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s7(device6);
+                    boost::archive::binary_iarchive ih(s7);
+                    ih >> driver;
+                    this->myTaxiCenter->addDriver(driver);
                     numOfDrivers--;
                     break;
                 }
@@ -160,20 +164,59 @@ void MainFlow::mainFlow(){
                 currentPoint->getPoint().printPoint();
                 break;
             }
-                //this mission is fpr make the move of the drivers that holds a trip
-            case 6: {
-                this->getTaxiCenter()->connectDriversToTrips();
-                this->getTaxiCenter()->startDriving();
-                break;
-            }
             //this mission increase the time by one
             case 9: {
                 time++;
+                int thereIsTrip = checkIfTimeToTrip(time);
+                this->getTaxiCenter()->startDriving();
+                //int thereIsTrip = checkIfTimeToTrip(time);
+                if(thereIsTrip!=-1){
+                    //find the trip info
+                    TripInfo* tripInfo = this->myTaxiCenter->getTripsVector().at(thereIsTrip);
+                    //sent the tripInfo case number
+                    socket->sendData("3");
+                    //send the tripInfo
+                    std::string serial_str2;
+                    boost::iostreams::back_insert_device<std::string> inserter2(serial_str2);
+                    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s3(inserter2);
+                    boost::archive::binary_oarchive ob(s3);
+                    ob << tripInfo;
+                    s3.flush();
+                    socket->sendData(serial_str2);
+
+                    //find destPoint
+                    Node* destPoint = this->myTaxiCenter->getTripsVector().at(thereIsTrip)->getEndingP();
+                    //sent the destination point case number
+                    socket->sendData("4");
+                    //send the destination point
+                    std::string serial_str3;
+                    boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
+                    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s4(inserter3);
+                    boost::archive::binary_oarchive oc(s4);
+                    oc << destPoint;
+                    s4.flush();
+                    socket->sendData(serial_str3);
+
+                    thereIsTrip++;//for debugging
+                }
+                //sent the new location case number
+                socket->sendData("5");
+                //send new location (Node*)
+                Node* newLocation = this->myTaxiCenter->getDriversVector().at(0)->getCurrentPoint();
+                std::string serial_str4;
+                boost::iostreams::back_insert_device<std::string> inserter4(serial_str4);
+                boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s5(inserter4);
+                boost::archive::binary_oarchive od(s5);
+                od << newLocation;
+                s5.flush();
+                socket->sendData(serial_str4);
                 break;
             }
         }
         //if the user press 7 the game will end
     }while(mission!=7);
+    //sent the delete case number
+    socket->sendData("7");
     return;
 }
 

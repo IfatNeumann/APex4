@@ -59,7 +59,7 @@ int TaxiCenter::srcClosestTaxiDriver(int indexOfTrip) {
           if (this->tripsList[indexOfTrip]->getStartingP()->getPoint().getX()==this->driversList[i]->getCurrentPoint()->
                   getPoint().getX()&&this->tripsList[indexOfTrip]->getStartingP()->getPoint().getY()==
                                                            this->driversList[i]->getCurrentPoint()->getPoint().getY()
-              &&this->driversList[i]->getifAvailable()==true){
+              &&this->driversList[i]->getIfAvailable()==true){
               this->driversList[i]->setIfAvailable(false);
               return i;
           }
@@ -78,8 +78,6 @@ void TaxiCenter::updateDriverPassengers(Driver* closestTaxi, Node* costmSource, 
 }
 
 void TaxiCenter::connectDriversToTrips(int indexOfTrip){
-    //for(int i=0;i<tripsList.size();i++) {
-        //if (this->tripsList[indexOfTrip] != NULL) {
             int indexOfDriver = srcClosestTaxiDriver(indexOfTrip);
             if (indexOfDriver != -1) {
                 this->driversList[indexOfDriver]->setMyTripInfo(this->tripsList[indexOfTrip]);
@@ -93,13 +91,13 @@ void TaxiCenter::connectDriversToTrips(int indexOfTrip){
                                                                   tripsList[indexOfTrip]->getEndingP()));
             }
         }
-    }
-}
+
+
 
     void TaxiCenter::startDriving(){
         for(int i=0;i<this->driversList.size();i++){
             if(driversList[i]->getMyTripInfo()!=NULL&&driversList[i]->getMyTripInfo()->getTripJustStart()==false) {
-                driversList[i]->setCurrentPoint(driversList[i]->getMyTripInfo()->getEndingP());
+                driversList[i]->setCurrentPoint(getTheNextNode(i));
                 driversList[i]->setIfAvailable(true);
                 driversList[i]->setMyTripInfo(NULL);
             }
@@ -120,3 +118,9 @@ void TaxiCenter::deleteTripThatEnd(int indexOfTrip){
             tripsList[indexOfTrip] = NULL;
         }
 }
+
+Node* TaxiCenter::getTheNextNode(int indexOfDriver){
+    Point current=driversList[indexOfDriver]->getMyTripInfo()->getNextPoint(driversList[indexOfDriver]->getTxCabInfo()->
+            getTariffCoefficient());
+      return this->myGrid->getNode(current);
+    }

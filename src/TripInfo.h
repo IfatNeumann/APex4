@@ -99,7 +99,7 @@ public:
      */
     void setHaveDriver(bool haveOrNot);
     void setTripJustStart(bool startOrNot);
-    void setMyWay(stack tripWay);
+    void setMyWay(stack<Point> tripWay);
     /**
      * This function returns the ride's id.
      * @return variable from type int
@@ -142,7 +142,7 @@ public:
     bool getHaveDriver();
     int getTimeOfStart();
     bool getTripJustStart();
-    Point getTheNextPoint();
+    Point getNextPoint(int stanOrLux);
 };
 
 

@@ -47,7 +47,7 @@ void TripInfo::setHaveDriver(bool haveOrNot){
 void TripInfo::setTripJustStart(bool startOrNot) {
     this->tripJustStart=startOrNot;
 }
-void TripInfo::setMyWay(stack tripWay) {
+void TripInfo::setMyWay(stack<Point> tripWay) {
     this->myWay = tripWay;
 }
 int TripInfo::getRideId(){
@@ -84,7 +84,14 @@ int TripInfo::getTimeOfStart(){
 bool TripInfo::getTripJustStart() {
     return this->tripJustStart;
 }
-Point TripInfo::getTheNextPoint(){
-    return this->myWay
+Point TripInfo::getNextPoint(int stanOrLux){
+    int i = 0;
+    Point current;
+    while(i<stanOrLux) {
+        current = this->myWay.top();
+        this->myWay.pop();
+        i++;
+    }
+    return current;
 }
 
