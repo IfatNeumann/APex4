@@ -21,6 +21,7 @@ private:
     TaxiCenter* myTaxiCenter;
     Grid* grid;
     vector<Cab*> cabsVector;
+    vector<TripInfo*> tripsOnTime;
     friend class boost::serialization::access;
 
     template<class Archive>
@@ -94,7 +95,7 @@ public:
      * @return grid
      */
     Grid* getGrid();
-
+    void checkIfTimeToTrip(int time);
     void mainFlow();
 };
 #endif //APEX2_MAINFLOW_H

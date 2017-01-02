@@ -1,4 +1,5 @@
 #include "TripInfo.h"
+
 TripInfo::TripInfo(){}
 TripInfo::TripInfo(int rideId, Node* startingP, Node* endingP, int numOfPassen,double tariff, int timeOfStart)
 {
@@ -10,6 +11,8 @@ TripInfo::TripInfo(int rideId, Node* startingP, Node* endingP, int numOfPassen,d
     this->tariff = tariff;
     this->haveDriver = false;
     this->timeOfStart = timeOfStart;
+    this->tripJustStart = false;
+    this->myWay;
 }
 
 TripInfo::~TripInfo() {
@@ -41,6 +44,12 @@ void TripInfo::setTariff(float tariff){
 void TripInfo::setHaveDriver(bool haveOrNot){
     this->haveDriver = haveOrNot;
 }
+void TripInfo::setTripJustStart(bool startOrNot) {
+    this->tripJustStart=startOrNot;
+}
+void TripInfo::setMyWay(stack tripWay) {
+    this->myWay = tripWay;
+}
 int TripInfo::getRideId(){
     return this->rideId;
 }
@@ -67,5 +76,15 @@ float TripInfo::getTariff(){
 
 bool TripInfo::getHaveDriver(){
     return this->haveDriver;
+}
+
+int TripInfo::getTimeOfStart(){
+    return this->timeOfStart;
+}
+bool TripInfo::getTripJustStart() {
+    return this->tripJustStart;
+}
+Point TripInfo::getTheNextPoint(){
+    return this->myWay
 }
 

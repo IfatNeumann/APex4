@@ -3,9 +3,12 @@
 TaxiCenter::TaxiCenter() {
     this->driversList;
     this->tripsList;
+    this->myGrid = NULL;
+    this->myBFS = NULL;
 }
 
 TaxiCenter::~TaxiCenter() {
+    delete(myBFS);
     for (int i = 0; i < driversList.size(); ++i) {
         delete driversList[i];
     }
@@ -16,7 +19,13 @@ TaxiCenter::~TaxiCenter() {
     }
 }
 
-
+void TaxiCenter::setMyGrid(Grid* gameGrid) {
+    this->myGrid = gameGrid;
+    setMyBFS();
+}
+void TaxiCenter::setMyBFS() {
+    this->myBFS = new BFS(this->myGrid);
+}
 vector<Driver*> TaxiCenter::getDriversVector(){
     return this->driversList;
 }
@@ -68,17 +77,20 @@ void TaxiCenter::updateDriverPassengers(Driver* closestTaxi, Node* costmSource, 
     closestTaxi->setTotalCustomersNum();
 }
 
-void TaxiCenter::connectDriversToTrips(){
-    for(int i=0;i<tripsList.size();i++) {
-        if (this->tripsList[i] != NULL) {
-            int indexOfDriver = srcClosestTaxiDriver(i);
+void TaxiCenter::connectDriversToTrips(int indexOfTrip){
+    //for(int i=0;i<tripsList.size();i++) {
+        //if (this->tripsList[indexOfTrip] != NULL) {
+            int indexOfDriver = srcClosestTaxiDriver(indexOfTrip);
             if (indexOfDriver != -1) {
-                this->driversList[indexOfDriver]->setMyTripInfo(this->tripsList[i]);
+                this->driversList[indexOfDriver]->setMyTripInfo(this->tripsList[indexOfTrip]);
                 updateDriverPassengers(this->driversList[indexOfDriver],
-                                       this->tripsList[i]->getStartingP(),
-                                       this->tripsList[i]->getEndingP(),
-                                       this->tripsList[i]->getNumOfPassen());
-                tripsList[i]->setHaveDriver(true);
+                                       this->tripsList[indexOfTrip]->getStartingP(),
+                                       this->tripsList[indexOfTrip]->getEndingP(),
+                                       this->tripsList[indexOfTrip]->getNumOfPassen());
+                tripsList[indexOfTrip]->setHaveDriver(true);
+                tripsList[indexOfTrip]->setTripJustStart(true);
+                tripsList[indexOfTrip]->setMyWay(this->myBFS->bfs(tripsList[indexOfTrip]->getStartingP(),
+                                                                  tripsList[indexOfTrip]->getEndingP()));
             }
         }
     }
@@ -86,16 +98,25 @@ void TaxiCenter::connectDriversToTrips(){
 
     void TaxiCenter::startDriving(){
         for(int i=0;i<this->driversList.size();i++){
-            if(driversList[i]->getMyTripInfo()!=NULL) {
+            if(driversList[i]->getMyTripInfo()!=NULL&&driversList[i]->getMyTripInfo()->getTripJustStart()==false) {
                 driversList[i]->setCurrentPoint(driversList[i]->getMyTripInfo()->getEndingP());
                 driversList[i]->setIfAvailable(true);
                 driversList[i]->setMyTripInfo(NULL);
             }
-        }
-        for(int i=0;i<this->tripsList.size();i++){
-            if(tripsList[i]!=NULL&&tripsList[i]->getHaveDriver()==true){
-                delete(tripsList[i]);
-                tripsList[i] = NULL;
+            if(driversList[i]->getMyTripInfo()->getTripJustStart()==false){
+                driversList[i]->getMyTripInfo()->setTripJustStart(true);
+            }
+            if(driversList[i]->getCurrentPoint()==driversList[i]->getMyTripInfo()->getEndingP()){
+                deleteTripThatEnd(i);
             }
         }
-    }
+
+        }
+
+
+void TaxiCenter::deleteTripThatEnd(int indexOfTrip){
+        if(tripsList[indexOfTrip]!=NULL&&tripsList[indexOfTrip]->getHaveDriver()==true) {
+            delete (tripsList[indexOfTrip]);
+            tripsList[indexOfTrip] = NULL;
+        }
+}

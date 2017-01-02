@@ -53,8 +53,8 @@ void MainFlow::createTripInfo(int tripId, int xStartPoint,int yStartPoint, int x
 
 void MainFlow::createGrid(int gridX,int gridY){
     this->grid = new Grid(gridX,gridY);
-    return;
-}
+    this->myTaxiCenter->setMyGrid(this->grid);
+    }
 Grid* MainFlow::getGrid(){
     return this->grid;
 }
@@ -63,6 +63,16 @@ Cab* MainFlow::getCab(int texiId) {
     for(int i=0;i<this->cabsVector.size();i++){
         if(this->cabsVector[i]->getId()==texiId){
             return this->cabsVector[i];
+        }
+    }
+}
+
+void MainFlow::checkIfTimeToTrip(int time){
+    for(int i=0; i<this->myTaxiCenter->getTripsVector().size();i++) {
+        if(this->myTaxiCenter->getTripsVector().at(i)->getTimeOfStart()==time&&
+                this->myTaxiCenter->getTripsVector().at(i)->getHaveDriver()== false&&
+                this->myTaxiCenter->getTripsVector().at(i)!=NULL){
+            this->myTaxiCenter->connectDriversToTrips(i);
         }
     }
 }
@@ -149,13 +159,15 @@ void MainFlow::mainFlow(){
             }
                 //this mission is fpr make the move of the drivers that holds a trip
             case 6: {
-                this->getTaxiCenter()->connectDriversToTrips();
+                //this->getTaxiCenter()->connectDriversToTrips();
                 this->getTaxiCenter()->startDriving();
                 break;
             }
             //this mission increase the time by one
             case 9: {
                 time++;
+                checkIfTimeToTrip(time);
+                this->getTaxiCenter()->startDriving();
                 break;
             }
         }

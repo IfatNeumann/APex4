@@ -9,6 +9,10 @@
 
 #include "Point.h"
 #include "Node.h"
+#include "BFS.h"
+#include<stack>
+using namespace std;
+
 
 class TripInfo {
 private:
@@ -20,6 +24,8 @@ private:
     double tariff;
     bool haveDriver;
     int timeOfStart;
+    bool tripJustStart;
+    std::stack<Point> myWay;
     friend class boost::serialization::access;
 
     template<class Archive>
@@ -92,6 +98,8 @@ public:
      * @param haveOrNot variable from type boolean
      */
     void setHaveDriver(bool haveOrNot);
+    void setTripJustStart(bool startOrNot);
+    void setMyWay(stack tripWay);
     /**
      * This function returns the ride's id.
      * @return variable from type int
@@ -132,6 +140,9 @@ public:
      * @return true or false
      */
     bool getHaveDriver();
+    int getTimeOfStart();
+    bool getTripJustStart();
+    Point getTheNextPoint();
 };
 
 

@@ -19,6 +19,8 @@ class TaxiCenter {
 private:
     vector <Driver*> driversList;
     vector <TripInfo*> tripsList;
+    Grid* myGrid;
+    BFS* myBFS;
 public:
     /**
      * constructor.
@@ -29,7 +31,8 @@ public:
      * Destructor.
      */
     ~TaxiCenter();
-
+    void setMyGrid(Grid* gameGrid);
+    void setMyBFS();
     /**
      * This function returns the drivers vector.
      * @return vector of the drivers objects.
@@ -94,12 +97,13 @@ public:
     /**
      * This function sets the trips in the drivers that mach them.
      */
-    void connectDriversToTrips();
+    void connectDriversToTrips(int indexOfTrip);
 
     /***
      * This function cause the trips to start and make the driver gets to the destination point of the trip
      */
     void startDriving();
+    void deleteTripThatEnd(int indexOfTrip);
 };
 
 #endif //APEX2_TAXICENTER_H
