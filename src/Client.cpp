@@ -1,10 +1,4 @@
 #include <iostream>
-#include <sys/socket.h>
-#include <stdio.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <string.h>
 #include "Client.h"
 #include "../sockets/Udp.h"
 #include "StandardCab.h"
@@ -39,7 +33,7 @@ int main(int argc,char* argv[]) {
     socket->sendData(serial_str);
 
     //receive mission number
-    int dataSize = socket->reciveData(buffer, 4096);
+    int dataSize;
     string missionNumString = string(buffer);
     missionNum = stoi(missionNumString);
 
@@ -52,7 +46,7 @@ int main(int argc,char* argv[]) {
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
                 boost::archive::binary_iarchive ia(s2);
                 ia >> taxi;
-                driver->setTaxi(taxi);
+                driver->setTxCabInfo(taxi);
                 //send driver *with* his taxi
                 std::string serial_str8;
                 boost::iostreams::back_insert_device<std::string> inserter8(serial_str8);
@@ -111,14 +105,10 @@ int main(int argc,char* argv[]) {
                 delete tripInfo;
                 delete socket;
                 //delete driver;
-                break;
+                return 0;
             }
 
         }
-        //receive mission number
-        dataSize = socket->reciveData(buffer, 4096);
-        missionNumString = string(buffer);
-        missionNum = stoi(missionNumString);
     }while(missionNum!=7);
     return 0;
 }

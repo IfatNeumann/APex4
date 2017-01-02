@@ -217,7 +217,6 @@ void MainFlow::mainFlow(int portNum){
     }while(mission!=7);
     //sent the delete case number
     socket->sendData("7");
-    return;
 }
 
 
