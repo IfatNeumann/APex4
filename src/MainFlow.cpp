@@ -118,6 +118,8 @@ void MainFlow::mainFlow(int portNum){
                     ia >> driver;
                     //find the taxi
                     Cab* taxi = this->getCab(driver->getTaxiId());
+                    //send the taxi case number
+                    socket->sendData("2");
                     //send the taxi
                     std::string serial_str;
                     boost::iostreams::back_insert_device<std::string> inserter(serial_str);

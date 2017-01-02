@@ -13,7 +13,7 @@ int main(int argc,char* argv[]) {
     int portNum = atoi(argv[2]);
     char status,dummy;
     char buffer[4096];
-    Client client;;
+    Client client;
     Driver* driver;
     Cab* taxi;
     TripInfo *tripInfo;
