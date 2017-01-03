@@ -116,8 +116,11 @@ void MainFlow::mainFlow(int portNum){
                     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
                     boost::archive::binary_iarchive ia(s2);
                     ia >> driver;
+                    driver->setCurrentPoint(grid->getNode(Point(0,0)));
+                    Node* currentPoint=driver->getCurrentPoint();
                     //find the taxi
                     Cab* taxi = this->getCab(driver->getTaxiId());
+
                     //send the taxi case number
                     socket->sendData("2");
                     //send the taxi
@@ -128,6 +131,14 @@ void MainFlow::mainFlow(int portNum){
                     oa << taxi;
                     s.flush();
                     socket->sendData(serial_str);
+                    //serialize and send current point
+                    std::string serial_str3;
+                    boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
+                    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s4(inserter3);
+                    boost::archive::binary_oarchive oc(s4);
+                    oc << currentPoint;
+                    s4.flush();
+                    socket->sendData(serial_str3);
                     //receive driver *with* his cab object
                     dataSize = socket->reciveData(buffer,4096);
                     boost::iostreams::basic_array_source<char> device6(buffer,dataSize);
@@ -164,7 +175,6 @@ void MainFlow::mainFlow(int portNum){
                 Driver *driverCurrentPoint = this->getTaxiCenter()->getDriverById(idToGet);
                 Node *currentPoint = driverCurrentPoint->getCurrentPoint();
                 currentPoint->getPoint().printPoint();
-                break;
             }
             //this mission increase the time by one
             case 9: {
@@ -198,6 +208,7 @@ void MainFlow::mainFlow(int portNum){
                     oc << destPoint;
                     s4.flush();
                     socket->sendData(serial_str3);
+
                 }
                 //sent the new location case number
                 socket->sendData("5");

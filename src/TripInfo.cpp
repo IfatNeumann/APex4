@@ -11,7 +11,7 @@ TripInfo::TripInfo(int rideId, Node* startingP, Node* endingP, int numOfPassen,d
     this->tariff = tariff;
     this->haveDriver = false;
     this->timeOfStart = timeOfStart;
-    this->tripJustStart = false;
+    this->tripJustStart = true;
     this->myWay;
 }
 

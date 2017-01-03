@@ -97,14 +97,14 @@ void TaxiCenter::connectDriversToTrips(int indexOfTrip){
         for(int i=0;i<this->driversList.size();i++){
             if(driversList[i]->getMyTripInfo()!=NULL&&driversList[i]->getMyTripInfo()->getTripJustStart()==false) {
                 driversList[i]->setCurrentPoint(getTheNextNode(i));
-                driversList[i]->setIfAvailable(true);
-                driversList[i]->setMyTripInfo(NULL);
             }
-            if(driversList[i]->getMyTripInfo()->getTripJustStart()==false){
-                driversList[i]->getMyTripInfo()->setTripJustStart(true);
+            if(driversList[i]->getMyTripInfo()->getTripJustStart()==true){
+                driversList[i]->getMyTripInfo()->setTripJustStart(false);
             }
             if(driversList[i]->getCurrentPoint()==driversList[i]->getMyTripInfo()->getEndingP()){
                 deleteTripThatEnd(i);
+                driversList[i]->setIfAvailable(true);
+                driversList[i]->setMyTripInfo(NULL);
             }
         }
 

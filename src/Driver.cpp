@@ -7,20 +7,6 @@
  */
 #include "Driver.h"
 Driver::Driver(){}
-Driver::Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, Cab* texiInfo,Node* currentPoint)
-{
-    this->id=id;
-    this->age=age;
-    this->martialSta=martialSta;
-    this->yrsOfExp=yrsOfExp;
-    this->avgStsfc=0;
-    this->txCabInfo=texiInfo;
-    this->totalCustomersNum=0;
-    this->currentPassen;
-    this->myTripInfo=NULL;
-    this->currentPoint=currentPoint;
-    this->ifAvailable = true;
-}
 
 Driver::Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, int taxiId)
 {
@@ -34,7 +20,7 @@ Driver::Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, int taxi
     this->totalCustomersNum=0;
     this->currentPassen;
     this->myTripInfo=NULL;
-    this->currentPoint;
+    this->currentPoint=NULL;
     this->ifAvailable = true;
 }
 

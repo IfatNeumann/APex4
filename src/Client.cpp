@@ -21,7 +21,7 @@ int main(int argc,char* argv[]) {
     socket->initialize();
     int missionNum;
     int dataSize;
-    Node *endPoint;
+    Node *endPoint,*currentPoint;
 
     cin >> id >> dummy >> age >> dummy >> status >> dummy >> experience >> dummy >> taxiId;
     driver = client.createDriver(id, age, status, experience, taxiId);
@@ -47,6 +47,13 @@ int main(int argc,char* argv[]) {
                 boost::archive::binary_iarchive ia(s2);
                 ia >> taxi;
                 driver->setTxCabInfo(taxi);
+                //receiving the current point
+                dataSize = socket->reciveData(buffer, 4096);
+                boost::iostreams::basic_array_source<char> device3(buffer, dataSize);
+                boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s4(device3);
+                boost::archive::binary_iarchive ic(s4);
+                ic >> currentPoint;
+                driver->setCurrentPoint(currentPoint);
                 //send driver *with* his taxi
                 std::string serial_str8;
                 boost::iostreams::back_insert_device<std::string> inserter8(serial_str8);
@@ -82,21 +89,12 @@ int main(int argc,char* argv[]) {
                 Node *nextPoint;
                 //receive next point
                 dataSize = socket->reciveData(buffer, 4096);
-                do {
-                    boost::iostreams::basic_array_source<char> device4(buffer, dataSize);
-                    boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s5(device4);
-                    boost::archive::binary_iarchive ie(s5);
-                    ie >> nextPoint;
-                    driver->setCurrentPoint(nextPoint);
-                    //receive next point
-                    dataSize = socket->reciveData(buffer, 4096);
-                } while (!(nextPoint->getPoint().isEqualTo(endPoint->getPoint())));
-                //receive the last point (endPoint)
                 boost::iostreams::basic_array_source<char> device4(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s5(device4);
                 boost::archive::binary_iarchive ie(s5);
                 ie >> nextPoint;
                 driver->setCurrentPoint(nextPoint);
+
                 break;
             }
             //delete
