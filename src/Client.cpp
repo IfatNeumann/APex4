@@ -20,6 +20,7 @@ int main(int argc,char* argv[]) {
     Socket* socket= new Udp(false,portNum);
     socket->initialize();
     int missionNum;
+    int dataSize;
     Node *endPoint;
 
     cin >> id >> dummy >> age >> dummy >> status >> dummy >> experience >> dummy >> taxiId;
@@ -32,12 +33,11 @@ int main(int argc,char* argv[]) {
     s.flush();
     socket->sendData(serial_str);
 
-    //receive mission number
-    int dataSize;
-    string missionNumString = string(buffer);
-    missionNum = stoi(missionNumString);
-
     do {
+        //receive mission number
+        dataSize = socket->reciveData(buffer, 4096);
+        string missionNumString = string(buffer);
+        missionNum = stoi(missionNumString);
         switch(missionNum) {
             //receive taxi
             case (2): {
@@ -107,7 +107,6 @@ int main(int argc,char* argv[]) {
                 //delete driver;
                 return 0;
             }
-
         }
     }while(missionNum!=7);
     return 0;
