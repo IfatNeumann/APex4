@@ -49,6 +49,7 @@ void TripInfo::setTripJustStart(bool startOrNot) {
 }
 void TripInfo::setMyWay(stack<Point> tripWay) {
     this->myWay = tripWay;
+    this->myWay.pop();
 }
 int TripInfo::getRideId(){
     return this->rideId;

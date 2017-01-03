@@ -85,7 +85,6 @@ void TaxiCenter::connectDriversToTrips(int indexOfTrip){
                                        this->tripsList[indexOfTrip]->getEndingP(),
                                        this->tripsList[indexOfTrip]->getNumOfPassen());
                 tripsList[indexOfTrip]->setHaveDriver(true);
-                tripsList[indexOfTrip]->setTripJustStart(true);
                 tripsList[indexOfTrip]->setMyWay(this->myBFS->bfs(tripsList[indexOfTrip]->getStartingP(),
                                                                   tripsList[indexOfTrip]->getEndingP()));
             }
@@ -98,7 +97,7 @@ void TaxiCenter::connectDriversToTrips(int indexOfTrip){
             if(driversList[i]->getMyTripInfo()!=NULL&&driversList[i]->getMyTripInfo()->getTripJustStart()==false) {
                 driversList[i]->setCurrentPoint(getTheNextNode(i));
             }
-            if(driversList[i]->getMyTripInfo()->getTripJustStart()==true){
+            if(driversList[i]->getMyTripInfo()->getTripJustStart()){
                 driversList[i]->getMyTripInfo()->setTripJustStart(false);
             }
             if(driversList[i]->getCurrentPoint()==driversList[i]->getMyTripInfo()->getEndingP()){
