@@ -136,8 +136,8 @@ void MainFlow::mainFlow(int portNum){
                     ih >> driver;
                     this->myTaxiCenter->addDriver(driver);
                     numOfDrivers--;
-                    break;
                 }
+                break;
             }
                 //this mission is for creating and adding a new trip to the game
             case 2: {
@@ -198,8 +198,6 @@ void MainFlow::mainFlow(int portNum){
                     oc << destPoint;
                     s4.flush();
                     socket->sendData(serial_str3);
-
-                    thereIsTrip++;//for debugging
                 }
                 //sent the new location case number
                 socket->sendData("5");

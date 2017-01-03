@@ -40,6 +40,7 @@ private:
         ar & yrsOfExp;
         ar & avgStsfc;
         ar & taxiId;
+        ar & txCabInfo;
         ar & totalCustomersNum;
         ar & currentPassen;
         ar & myTripInfo;

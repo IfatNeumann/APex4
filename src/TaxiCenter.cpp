@@ -56,10 +56,9 @@ void TaxiCenter::answerPhone(Point* source, Point* dest, int numOfPassengers){
 
 int TaxiCenter::srcClosestTaxiDriver(int indexOfTrip) {
      for (int i = 0; i <driversList.size();i++) {
-          if (this->tripsList[indexOfTrip]->getStartingP()->getPoint().getX()==this->driversList[i]->getCurrentPoint()->
-                  getPoint().getX()&&this->tripsList[indexOfTrip]->getStartingP()->getPoint().getY()==
-                                                           this->driversList[i]->getCurrentPoint()->getPoint().getY()
-              &&this->driversList[i]->getIfAvailable()==true){
+          if ((this->tripsList[indexOfTrip]->getStartingP()->getPoint().isEqualTo
+                  (this->driversList[i]->getCurrentPoint()->getPoint()))&&
+                  (this->driversList[i]->getIfAvailable())){
               this->driversList[i]->setIfAvailable(false);
               return i;
           }
