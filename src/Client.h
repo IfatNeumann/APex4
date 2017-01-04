@@ -1,6 +1,10 @@
 #ifndef APEX4_CLIENT_H
 #define APEX4_CLIENT_H
-
+#include <iostream>
+#include "Udp.h"
+#include "StandardCab.h"
+#include "LuxuryCab.h"
+#include <boost/serialization/export.hpp>
 #include "Grid.h"
 #include "Driver.h"
 class Client {

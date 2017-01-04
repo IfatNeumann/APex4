@@ -1,10 +1,4 @@
 #include <iostream>
-#include <sys/socket.h>
-#include <stdio.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <string.h>
 #include "MainFlow.h"
 #include <boost/serialization/export.hpp>
 BOOST_CLASS_EXPORT_GUID(StandardCab,"StandardCab")

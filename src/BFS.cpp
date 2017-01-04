@@ -1,4 +1,3 @@
-#include <iostream>
 #include "BFS.h"
 
 BFS::BFS(Grid* g){

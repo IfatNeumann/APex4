@@ -1,6 +1,4 @@
 #include "Grid.h"
-#include <stdexcept>
-#include <iostream>
 
 Grid::Grid(int w, int h) {
     height = h;

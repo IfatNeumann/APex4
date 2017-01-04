@@ -3,6 +3,7 @@
 #include "Grid.h"
 #include <stack>
 #include <queue>
+#include <iostream>
 /*
 * class BFS
 * this class is responsible to find and print the shortest way

@@ -1,6 +1,5 @@
-#include <iostream>
 #include "Point.h"
-#include <stdexcept>
+
 Point::Point(int newX,int newY){
 if((newX<0)||(newY<0))
         throw std::invalid_argument("negative axe location");

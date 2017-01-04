@@ -98,7 +98,15 @@ public:
      * @param haveOrNot variable from type boolean
      */
     void setHaveDriver(bool haveOrNot);
+    /**
+     *
+     * @param startOrNot
+     */
     void setTripJustStart(bool startOrNot);
+    /**
+     * This function receive the bfs ways. that present the way between the trip's start to the end.
+     * @param tripWay the trip's way to set on the member
+     */
     void setMyWay(stack<Point> tripWay);
     /**
      * This function returns the ride's id.

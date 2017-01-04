@@ -1,13 +1,5 @@
 #include "MainFlow.h"
-#include <iostream>
-#include <sys/socket.h>
-#include <stdio.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <string.h>
-#include "Client.h"
-#include "../sockets/Udp.h"
+
 
 MainFlow::MainFlow(){
     this->myTaxiCenter = new TaxiCenter();

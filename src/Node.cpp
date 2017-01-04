@@ -1,6 +1,5 @@
 #include "Node.h"
-#include <iostream> //for the NULL
-#include <stdexcept>
+
 Node::Node(){
 
 }
