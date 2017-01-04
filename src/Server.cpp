@@ -14,6 +14,6 @@ int main(int argc,char* argv[]) {
     int portNum = atoi(argv[1]);
     MainFlow* mainflow = new MainFlow();
     mainflow->mainFlow(portNum);
-
+    delete mainflow;
     return 0;
 }
