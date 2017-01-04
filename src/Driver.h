@@ -58,9 +58,11 @@ public:
  * @param yrsOfExp number of years of experience
  * @param taxiId the id of the cab object that belongs to this driver
  */
-    Driver();
-    Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, Cab* texiInfo, Node* currentPoint);
     Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, int taxiId);
+    /**
+     * Constructor.
+     */
+    Driver();
     /**
      * Destructor.
      */

@@ -31,8 +31,8 @@ void Node::setParent(Node* prnt){
 Point Node::getPoint(){
     return point;
 }
-void Node::setVisited(){
-    visited = true;
+void Node::setVisited(bool isVisited){
+    visited = isVisited;
 }
 void Node::setNeighbor(Point neighbor,int i){
 if(i>3||i<0)

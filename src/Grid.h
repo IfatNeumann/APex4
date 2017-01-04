@@ -51,6 +51,10 @@ public:
     * this function recieves a point and return true if it's in the grid and false otherwise
     */
     bool inTheGrid(Point p);
+    /*
+    * this function initialize the nodes' 'visited' and 'parent' members
+    */
+    void initializeBeforeTrip();
 };
 
 

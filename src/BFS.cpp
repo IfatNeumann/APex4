@@ -10,19 +10,23 @@ BFS::~BFS(){
 
 std::stack<Point> BFS::bfs(Node* startN, Node* destN){//destination
     Node* neighbor;
+    //initialize way
+    while(!way.empty()){
+        way.pop();
+    }
     //in case the starting point and the destination point are equal (edge case)
     if((*startN).getPoint().isEqualTo((*destN).getPoint())){
         way.push((*startN).getPoint());
         return way;
     }
     nodes.push(startN);
-    (*startN).setVisited();
+    (*startN).setVisited(true);
     while (!nodes.empty()){
         Node *thisNode = nodes.front();
         for (int i=0;i<thisNode->getNumOfNeighbors();i++) { //for each neighbor
             neighbor = grid->getNeighbor(thisNode, i);
             if (!neighbor->getVisited()) {//if not visited
-                neighbor->setVisited();
+                neighbor->setVisited(true);
                 neighbor->setParent(thisNode);
                 nodes.push(neighbor);
                 if (neighbor->getPoint().isEqualTo((*destN).getPoint())) {
@@ -35,6 +39,9 @@ std::stack<Point> BFS::bfs(Node* startN, Node* destN){//destination
                             getPoint().isEqualTo((*startN).getPoint()));
                     if(thisNode!=NULL)
                         way.push(thisNode->getPoint());
+                    while(!nodes.empty()){
+                        nodes.pop();
+                    }
                     return way;
                 }
             }

@@ -50,7 +50,7 @@ public:
     /*
     * this function changes the node's 'visited' member value from 'false' to 'true'
     */
-    void setVisited();
+    void setVisited(bool isVisited);
     /*
     * this function returns the node's 'visited' member value
     */
