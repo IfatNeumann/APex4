@@ -154,6 +154,8 @@ void MainFlow::mainFlow(int portNum){
             case 2: {
                 int tripId, xStartPoint, yStartPoint, xEndPoint, yEndPoint, numOfpassn,timeOfStart;
                 double tariff;
+                //initialize the nodes' 'visited' values
+                this->getGrid()->initializeBeforeTrip();
                 cin >> tripId >> dummy >> xStartPoint >> dummy >> yStartPoint >> dummy >> xEndPoint >> dummy >> yEndPoint >>
                     dummy >> numOfpassn >> dummy >> tariff >> dummy >> timeOfStart;
                 this->createTripInfo(tripId, xStartPoint, yStartPoint, xEndPoint, yEndPoint, numOfpassn, tariff, timeOfStart);
@@ -175,6 +177,7 @@ void MainFlow::mainFlow(int portNum){
                 Driver *driverCurrentPoint = this->getTaxiCenter()->getDriverById(idToGet);
                 Node *currentPoint = driverCurrentPoint->getCurrentPoint();
                 currentPoint->getPoint().printPoint();
+                break;
             }
             //this mission increase the time by one
             case 9: {

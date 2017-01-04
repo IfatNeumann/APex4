@@ -51,6 +51,7 @@ public:
     * this function recieves a point and return true if it's in the grid and false otherwise
     */
     bool inTheGrid(Point p);
+    void initializeBeforeTrip();
 };
 
 

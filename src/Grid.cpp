@@ -72,3 +72,12 @@ Node* Grid::getNode(Point p){
         throw std::invalid_argument("point not in the grid");
     return grid[p.getX()][p.getY()];
 }
+
+void Grid::initializeBeforeTrip(){
+    for (int i=0;i<width;i++){
+        for (int j=0;j<height;j++){
+            grid[i][j]->setVisited(false);
+            grid[i][j]->setParent(NULL);
+        }
+    }
+}
