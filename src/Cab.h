@@ -77,7 +77,7 @@ protected:
      */
     float getTariffCoefficient();
     /**
-     *
+     * This function sets the cab's total kilometers passed.
      * @param meters
      */
     virtual void setKmPassed(float meters) = 0;
