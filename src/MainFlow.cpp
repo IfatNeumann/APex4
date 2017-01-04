@@ -69,9 +69,9 @@ Cab* MainFlow::getCab(int texiId) {
 
 int MainFlow::checkIfTimeToTrip(int time){
     for(int i=0; i<this->myTaxiCenter->getTripsVector().size();i++) {
-        if(this->myTaxiCenter->getTripsVector().at(i)->getTimeOfStart()==time&&
-                this->myTaxiCenter->getTripsVector().at(i)->getHaveDriver()== false&&
-                this->myTaxiCenter->getTripsVector().at(i)!=NULL){
+        if(this->myTaxiCenter->getTripsVector().at(i)!=NULL&&
+                this->myTaxiCenter->getTripsVector().at(i)->getTimeOfStart()==time&&
+                this->myTaxiCenter->getTripsVector().at(i)->getHaveDriver()== false){
             this->myTaxiCenter->connectDriversToTrips(i);
             return i;
         }

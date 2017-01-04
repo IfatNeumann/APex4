@@ -94,7 +94,9 @@ int main(int argc,char* argv[]) {
                 boost::archive::binary_iarchive ie(s5);
                 ie >> nextPoint;
                 driver->setCurrentPoint(nextPoint);
-
+                if(driver->getCurrentPoint()->getPoint().isEqualTo(endPoint->getPoint())){
+                    driver->setMyTripInfo(NULL);
+                }
                 break;
             }
             //delete
