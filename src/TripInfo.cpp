@@ -89,6 +89,10 @@ bool TripInfo::getTripJustStart() {
 Point TripInfo::getNextPoint(int stanOrLux){
     int i = 0;
     Point current;
+    //case that the cab is luxury but we need less than two steps to get to the trip's end point
+    if(stanOrLux==2 && this->myWay.top().isEqualTo(this->endingP->getPoint())){
+        stanOrLux = 1;
+    }
     while(i<stanOrLux) {
         current = this->myWay.top();
         this->myWay.pop();
