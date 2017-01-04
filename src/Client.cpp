@@ -16,12 +16,12 @@ int main(int argc,char* argv[]) {
     Client client;
     Driver* driver;
     Cab* taxi;
-    TripInfo *tripInfo;
+    TripInfo *tripInfo = NULL;
     Socket* socket= new Udp(false,portNum);
     socket->initialize();
     int missionNum;
     int dataSize;
-    Node *endPoint,*currentPoint;
+    Node *endPoint = NULL,*currentPoint, *nextPoint = NULL;
 
     cin >> id >> dummy >> age >> dummy >> status >> dummy >> experience >> dummy >> taxiId;
     driver = client.createDriver(id, age, status, experience, taxiId);
@@ -65,33 +65,41 @@ int main(int argc,char* argv[]) {
 
                 break;
             }
-            //receive tripInfo
+                //receive tripInfo
             case (3): {
                 dataSize = socket->reciveData(buffer, 4096);
                 boost::iostreams::basic_array_source<char> device2(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s3(device2);
                 boost::archive::binary_iarchive ib(s3);
+                if(tripInfo!=NULL){
+                    delete(tripInfo);
+                }
                 ib >> tripInfo;
                 driver->setMyTripInfo(tripInfo);
                 break;
             }
-            //receive destination point
+                //receive destination point
             case (4): {
                 dataSize = socket->reciveData(buffer, 4096);
                 boost::iostreams::basic_array_source<char> device3(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s4(device3);
                 boost::archive::binary_iarchive ic(s4);
+                if(endPoint!=NULL){
+                    delete(endPoint);
+                }
                 ic >> endPoint;
                 break;
             }
-            //move one step
+                //move one step
             case (5): {
-                Node *nextPoint;
                 //receive next point
                 dataSize = socket->reciveData(buffer, 4096);
                 boost::iostreams::basic_array_source<char> device4(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s5(device4);
                 boost::archive::binary_iarchive ie(s5);
+                if(nextPoint!=NULL){
+                    delete(nextPoint);
+                }
                 ie >> nextPoint;
                 driver->setCurrentPoint(nextPoint);
                 if((endPoint!=NULL)&&(driver->getCurrentPoint()->getPoint().isEqualTo(endPoint->getPoint()))){
@@ -99,12 +107,15 @@ int main(int argc,char* argv[]) {
                 }
                 break;
             }
-            //delete
+                //delete
             case (7): {
+                delete endPoint;
+                delete currentPoint;
+                delete nextPoint;
                 delete taxi;
                 delete tripInfo;
                 delete socket;
-                //delete driver;
+                delete driver;
                 return 0;
             }
         }

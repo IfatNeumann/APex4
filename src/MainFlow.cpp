@@ -144,6 +144,7 @@ void MainFlow::mainFlow(int portNum){
                     boost::iostreams::basic_array_source<char> device6(buffer,dataSize);
                     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s7(device6);
                     boost::archive::binary_iarchive ih(s7);
+                    delete driver;
                     ih >> driver;
                     this->myTaxiCenter->addDriver(driver);
                     numOfDrivers--;
