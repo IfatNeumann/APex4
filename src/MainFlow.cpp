@@ -147,6 +147,7 @@ void MainFlow::mainFlow(int portNum){
                     boost::archive::binary_iarchive ih(s7);
                     delete driver;
                     ih >> driver;
+                    driver->setClientDescriptor(clientDescriptor);
                     this->myTaxiCenter->addDriver(driver);
                     numOfDrivers--;
                 }
@@ -158,9 +159,11 @@ void MainFlow::mainFlow(int portNum){
                 double tariff;
                 //initialize the nodes' 'visited' values
                 this->getGrid()->initializeBeforeTrip();
-                cin >> tripId >> dummy >> xStartPoint >> dummy >> yStartPoint >> dummy >> xEndPoint >> dummy >> yEndPoint >>
+                cin >> tripId >> dummy >> xStartPoint >> dummy >> yStartPoint >> dummy >>
+                    xEndPoint >> dummy >> yEndPoint >>
                     dummy >> numOfpassn >> dummy >> tariff >> dummy >> timeOfStart;
-                this->createTripInfo(tripId, xStartPoint, yStartPoint, xEndPoint, yEndPoint, numOfpassn, tariff, timeOfStart);
+                this->createTripInfo(tripId, xStartPoint, yStartPoint, xEndPoint, yEndPoint,
+                                     numOfpassn, tariff, timeOfStart);
                 break;
             }
             //this mission is for creating and adding a new vehicle to the game
@@ -186,46 +189,52 @@ void MainFlow::mainFlow(int portNum){
                 time++;
                 int thereIsTrip = checkIfTimeToTrip(time);
                 this->getTaxiCenter()->startDriving();
+                Driver* driver = this->myTaxiCenter->getDriverById(0);
                 //int thereIsTrip = checkIfTimeToTrip(time);
                 if(thereIsTrip!=-1){
                     //find the trip info
                     TripInfo* tripInfo = this->myTaxiCenter->getTripsVector().at(thereIsTrip);
                     //sent the tripInfo case number
-                    socket->sendData("3",client);
+                    socket->sendData("3",driver->getClientDescriptor());
                     //send the tripInfo
                     std::string serial_str2;
                     boost::iostreams::back_insert_device<std::string> inserter2(serial_str2);
-                    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s3(inserter2);
+                    boost::iostreams::stream<boost::iostreams::back_insert_device
+                            <std::string> > s3(inserter2);
                     boost::archive::binary_oarchive ob(s3);
                     ob << tripInfo;
                     s3.flush();
-                    socket->sendData(serial_str2);
+                    socket->sendData(serial_str2,driver->getClientDescriptor());
 
                     //find destPoint
-                    Node* destPoint = this->myTaxiCenter->getTripsVector().at(thereIsTrip)->getEndingP();
+                    Node* destPoint = this->myTaxiCenter->getTripsVector().at(thereIsTrip)
+                            ->getEndingP();
                     //sent the destination point case number
-                    socket->sendData("4");
+                    socket->sendData("4",,driver->getClientDescriptor());
                     //send the destination point
                     std::string serial_str3;
                     boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
-                    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s4(inserter3);
+                    boost::iostreams::stream<boost::iostreams::back_insert_device
+                            <std::string> > s4(inserter3);
                     boost::archive::binary_oarchive oc(s4);
                     oc << destPoint;
                     s4.flush();
-                    socket->sendData(serial_str3);
+                    socket->sendData(serial_str3,driver->getClientDescriptor());
 
                 }
                 //sent the new location case number
-                socket->sendData("5");
+                socket->sendData("5",driver->getClientDescriptor());
                 //send new location (Node*)
-                Node* newLocation = this->myTaxiCenter->getDriversVector().at(0)->getCurrentPoint();
+                Node* newLocation = this->myTaxiCenter->getDriversVector().at(0)->
+                        getCurrentPoint();
                 std::string serial_str4;
                 boost::iostreams::back_insert_device<std::string> inserter4(serial_str4);
-                boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s5(inserter4);
+                boost::iostreams::stream<boost::iostreams::back_insert_device
+                        <std::string> > s5(inserter4);
                 boost::archive::binary_oarchive od(s5);
                 od << newLocation;
                 s5.flush();
-                socket->sendData(serial_str4);
+                socket->sendData(serial_str4,driver->getClientDescriptor());
                 break;
             }
         }

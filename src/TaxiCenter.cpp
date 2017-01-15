@@ -2,7 +2,6 @@
 
 TaxiCenter::TaxiCenter() {
     this->driversList;
-    this->clientsSList;
     this->tripsList;
     this->myGrid = NULL;
     this->myBFS = NULL;

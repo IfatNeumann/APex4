@@ -104,3 +104,11 @@ void Driver::clearList(){
 void Driver::setTxCabInfo(Cab* cab){
     this->txCabInfo=cab;
 }
+
+void Driver::setClientDescriptor(int cDescriptor){
+    this->clientDescriptor=cDescriptor;
+}
+
+int Driver::getClientDescriptor(){
+    return this->clientDescriptor;
+}

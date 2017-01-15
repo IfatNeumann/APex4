@@ -47,6 +47,7 @@ private:
         ar & myTripInfo;
         ar & currentPoint;
         ar & ifAvailable;
+        ar & clientDescriptor;
     }
 public:
     /**
@@ -164,5 +165,7 @@ public:
      */
     void clearList();
     void setTxCabInfo(Cab* cab);
+    void setClientDescriptor(int clientDescriptor);
+    int getClientDescriptor();
 };
 #endif //APEX1_DRIVER_H
