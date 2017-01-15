@@ -17,12 +17,12 @@ int main(int argc,char* argv[]) {
     Driver* driver;
     Cab* taxi;
     TripInfo *tripInfo = NULL;
-    Socket* socket= new Tcp(false,portNum);
+    Tcp* socket= new Tcp(false,portNum);
     socket->initialize();
     int missionNum;
     int dataSize;
     Node *endPoint = NULL,*currentPoint, *nextPoint = NULL;
-
+    int serverDescriptor = socket->acceptOneClient();//?
     cin >> id >> dummy >> age >> dummy >> status >> dummy >> experience >> dummy >> taxiId;
     driver = client.createDriver(id, age, status, experience, taxiId);
     std::string serial_str;

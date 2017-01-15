@@ -86,7 +86,7 @@ void MainFlow::mainFlow(int portNum){
     char dummy;
     int mission;
     char buffer[4096];
-    Socket* socket= new Tcp(true,portNum);
+    Tcp* socket= new Tcp(true,portNum);
     socket->initialize();
 
     //entered the size of the grid (map)
@@ -110,7 +110,8 @@ void MainFlow::mainFlow(int portNum){
                 cin >> numOfDrivers;
                 while(numOfDrivers) {
                     //receive the driver
-                    int dataSize=socket->reciveData(buffer, 4096);
+                    int clientDescriptor = socket->acceptOneClient();
+                    int dataSize=socket->reciveData(buffer, 4096,clientDescriptor);
                     Driver *driver;
                     boost::iostreams::basic_array_source<char> device(buffer, dataSize);
                     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
@@ -122,7 +123,7 @@ void MainFlow::mainFlow(int portNum){
                     Cab* taxi = this->getCab(driver->getTaxiId());
 
                     //send the taxi case number
-                    socket->sendData("2");
+                    socket->sendData("2",clientDescriptor);
                     //send the taxi
                     std::string serial_str;
                     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
@@ -130,7 +131,7 @@ void MainFlow::mainFlow(int portNum){
                     boost::archive::binary_oarchive oa(s);
                     oa << taxi;
                     s.flush();
-                    socket->sendData(serial_str);
+                    socket->sendData(serial_str,clientDescriptor);
                     //serialize and send current point
                     std::string serial_str3;
                     boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
@@ -138,9 +139,9 @@ void MainFlow::mainFlow(int portNum){
                     boost::archive::binary_oarchive oc(s4);
                     oc << currentPoint;
                     s4.flush();
-                    socket->sendData(serial_str3);
+                    socket->sendData(serial_str3,clientDescriptor);
                     //receive driver *with* his cab object
-                    dataSize = socket->reciveData(buffer,4096);
+                    dataSize = socket->reciveData(buffer,4096,clientDescriptor);
                     boost::iostreams::basic_array_source<char> device6(buffer,dataSize);
                     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s7(device6);
                     boost::archive::binary_iarchive ih(s7);
@@ -190,7 +191,7 @@ void MainFlow::mainFlow(int portNum){
                     //find the trip info
                     TripInfo* tripInfo = this->myTaxiCenter->getTripsVector().at(thereIsTrip);
                     //sent the tripInfo case number
-                    socket->sendData("3");
+                    socket->sendData("3",client);
                     //send the tripInfo
                     std::string serial_str2;
                     boost::iostreams::back_insert_device<std::string> inserter2(serial_str2);

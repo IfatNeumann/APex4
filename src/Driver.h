@@ -29,6 +29,7 @@ private:
     TripInfo* myTripInfo;
     Node* currentPoint;
     bool ifAvailable;
+    int clientDescriptor;
     friend class boost::serialization::access;
 
     template<class Archive>
