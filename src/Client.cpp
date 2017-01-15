@@ -1,6 +1,6 @@
 #include <iostream>
 #include "Client.h"
-#include "../sockets/Udp.h"
+#include "../sockets/Tcp.h"
 #include "StandardCab.h"
 #include "LuxuryCab.h"
 #include <boost/serialization/export.hpp>
@@ -17,7 +17,7 @@ int main(int argc,char* argv[]) {
     Driver* driver;
     Cab* taxi;
     TripInfo *tripInfo = NULL;
-    Socket* socket= new Udp(false,portNum);
+    Socket* socket= new Tcp(false,portNum);
     socket->initialize();
     int missionNum;
     int dataSize;

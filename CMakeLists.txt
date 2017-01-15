@@ -7,7 +7,7 @@ set(BOOST_ROOT CACHE PATH "/usr/include/boost/")
 find_package(Boost 1.58.0 COMPONENTS serialization system)
 include_directories(${Boost_INCLUDE_DIR})
 
-set(core_sockets sockets/Socket.cpp sockets/Socket.h sockets/Udp.cpp sockets/Udp.h)
+set(core_sockets sockets/Socket.cpp sockets/Socket.h sockets/Udp.cpp sockets/Udp.h sockets/Tcp.cpp sockets/Tcp.h)
 add_library(sockets ${core_sockets})
 
 set(SOURCE_FILES_CLIENT src/Client.h src/Client.cpp src/Point.h src/Point.cpp src/BFS.cpp src/BFS.h src/Node.cpp src/Node.h

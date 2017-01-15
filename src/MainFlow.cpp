@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include "Client.h"
-#include "../sockets/Udp.h"
+#include "../sockets/Tcp.h"
 
 MainFlow::MainFlow(){
     this->myTaxiCenter = new TaxiCenter();
@@ -86,7 +86,7 @@ void MainFlow::mainFlow(int portNum){
     char dummy;
     int mission;
     char buffer[4096];
-    Socket* socket= new Udp(true,portNum);
+    Socket* socket= new Tcp(true,portNum);
     socket->initialize();
 
     //entered the size of the grid (map)
