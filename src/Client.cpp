@@ -30,24 +30,24 @@ int main(int argc,char* argv[]) {
     boost::archive::binary_oarchive oa(s);
     oa << driver;
     s.flush();
-    socket->sendData(serial_str,-1);
+    socket->sendData(serial_str,0);
 
     do {
         //receive mission number
-        dataSize = socket->reciveData(buffer, 4096,-1);
+        dataSize = socket->reciveData(buffer, 4096,0);
         string missionNumString = string(buffer);
         missionNum = stoi(missionNumString);
         switch(missionNum) {
             //receive taxi
             case (2): {
-                dataSize = socket->reciveData(buffer, 4096,-1);
+                dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
                 boost::archive::binary_iarchive ia(s2);
                 ia >> taxi;
                 driver->setTxCabInfo(taxi);
                 //receiving the current point
-                dataSize = socket->reciveData(buffer, 4096,-1);
+                dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device3(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s4(device3);
                 boost::archive::binary_iarchive ic(s4);
@@ -60,13 +60,13 @@ int main(int argc,char* argv[]) {
                 boost::archive::binary_oarchive ob(s8);
                 ob << driver;
                 s8.flush();
-                socket->sendData(serial_str8,-1);
+                socket->sendData(serial_str8,0);
 
                 break;
             }
                 //receive tripInfo
             case (3): {
-                dataSize = socket->reciveData(buffer, 4096,-1);
+                dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device2(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s3(device2);
                 boost::archive::binary_iarchive ib(s3);
@@ -79,7 +79,7 @@ int main(int argc,char* argv[]) {
             }
                 //receive destination point
             case (4): {
-                dataSize = socket->reciveData(buffer, 4096,-1);
+                dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device3(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s4(device3);
                 boost::archive::binary_iarchive ic(s4);
@@ -92,8 +92,8 @@ int main(int argc,char* argv[]) {
                 //move one step
             case (5): {
                 //receive next point
-                dataSize = socket->reciveData(buffer, 4096,-1);
-                boost::iostreams::basic_array_source<char> device4(buffer, dataSize,-1);
+                dataSize = socket->reciveData(buffer, 4096,0);
+                boost::iostreams::basic_array_source<char> device4(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s5(device4);
                 boost::archive::binary_iarchive ie(s5);
                 if(nextPoint!=NULL){
