@@ -210,7 +210,7 @@ void MainFlow::mainFlow(int portNum){
                     Node* destPoint = this->myTaxiCenter->getTripsVector().at(thereIsTrip)
                             ->getEndingP();
                     //sent the destination point case number
-                    socket->sendData("4",,driver->getClientDescriptor());
+                    socket->sendData("4",driver->getClientDescriptor());
                     //send the destination point
                     std::string serial_str3;
                     boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
@@ -240,8 +240,9 @@ void MainFlow::mainFlow(int portNum){
         }
         //if the user press 7 the game will end
     }while(mission!=7);
+    Driver* driver = this->myTaxiCenter->getDriverById(0);
     //sent the delete case number
-    socket->sendData("7");
+    socket->sendData("7",driver->getClientDescriptor());
 }
 
 
