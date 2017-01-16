@@ -7,12 +7,77 @@
 #include <unistd.h>
 #include <string.h>
 #include "Client.h"
+#include "Driver.h"
 #include "../sockets/Tcp.h"
+int mission;
+
+class ThreadClient{
+public:
+    TaxiCenter* taxiCenter;
+    Tcp* sock;
+    MainFlow* flow;
+    ThreadClient(TaxiCenter* tc, Tcp* s, MainFlow* f){
+        this->taxiCenter = tc;
+        this->sock = s;
+        this->flow = f;
+    }
+    ~ThreadClient(){}
+};
+
+//
+// This will handle connection for each client
+//
+void *connection_handler(void *socket_desc) {
+    ThreadClient* handler = (ThreadClient*)socket_desc;
+    char buffer[4096];
+    int clientDescriptor = handler->sock->acceptOneClient();
+    int dataSize = handler->sock->reciveData(buffer, 4096,clientDescriptor);
+    Driver *driver;
+    boost::iostreams::basic_array_source<char> device(buffer, dataSize);
+    boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
+    boost::archive::binary_iarchive ia(s2);
+    ia >> driver;
+    driver->setCurrentPoint(handler->flow->getGrid()->getNode(Point(0,0)));
+    Node* currentPoint=driver->getCurrentPoint();
+    //find the taxi
+    Cab* taxi = handler->flow->getCab(driver->getTaxiId());
+
+    //send the taxi case number
+    handler->sock->sendData("2",clientDescriptor);
+    //send the taxi
+    std::string serial_str;
+    boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
+    boost::archive::binary_oarchive oa(s);
+    oa << taxi;
+    s.flush();
+    handler->sock->sendData(serial_str,clientDescriptor);
+    //serialize and send current point
+    std::string serial_str3;
+    boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
+    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s4(inserter3);
+    boost::archive::binary_oarchive oc(s4);
+    oc << currentPoint;
+    s4.flush();
+    handler->sock->sendData(serial_str3,clientDescriptor);
+    //receive driver *with* his cab object
+    dataSize = handler->sock->reciveData(buffer,4096,clientDescriptor);
+    boost::iostreams::basic_array_source<char> device6(buffer,dataSize);
+    boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s7(device6);
+    boost::archive::binary_iarchive ih(s7);
+    delete driver;
+    ih >> driver;
+    driver->setClientDescriptor(clientDescriptor);
+    handler->taxiCenter->addDriver(driver);
+
+    pthread_exit(socket_desc);
+}
 
 MainFlow::MainFlow(){
     this->myTaxiCenter = new TaxiCenter();
     this->grid;
     this->cabsVector;
+    this->threads;
 }
 
 MainFlow::~MainFlow() {
@@ -84,7 +149,6 @@ void MainFlow::mainFlow(int portNum){
     int gridXAxe,gridYAxe,numOfObstacles;
     int xPoint,yPoint;
     char dummy;
-    int mission;
     char buffer[4096];
     Tcp* socket= new Tcp(true,portNum);
     socket->initialize();
@@ -108,50 +172,11 @@ void MainFlow::mainFlow(int portNum){
             case 1: {
                 int numOfDrivers;
                 cin >> numOfDrivers;
-                while(numOfDrivers) {
+                for(int i = 0; i < numOfDrivers; i++){
                     //receive the driver
-                    int clientDescriptor = socket->acceptOneClient();
-                    int dataSize=socket->reciveData(buffer, 4096,clientDescriptor);
-                    Driver *driver;
-                    boost::iostreams::basic_array_source<char> device(buffer, dataSize);
-                    boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
-                    boost::archive::binary_iarchive ia(s2);
-                    ia >> driver;
-                    driver->setCurrentPoint(grid->getNode(Point(0,0)));
-                    Node* currentPoint=driver->getCurrentPoint();
-                    //find the taxi
-                    Cab* taxi = this->getCab(driver->getTaxiId());
-
-                    //send the taxi case number
-                    socket->sendData("2",clientDescriptor);
-                    //send the taxi
-                    std::string serial_str;
-                    boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-                    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
-                    boost::archive::binary_oarchive oa(s);
-                    oa << taxi;
-                    s.flush();
-                    socket->sendData(serial_str,clientDescriptor);
-                    //serialize and send current point
-                    std::string serial_str3;
-                    boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
-                    boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s4(inserter3);
-                    boost::archive::binary_oarchive oc(s4);
-                    oc << currentPoint;
-                    s4.flush();
-                    socket->sendData(serial_str3,clientDescriptor);
-                    //receive driver *with* his cab object
-                    dataSize = socket->reciveData(buffer,4096,clientDescriptor);
-                    boost::iostreams::basic_array_source<char> device6(buffer,dataSize);
-                    boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s7(device6);
-                    boost::archive::binary_iarchive ih(s7);
-                    delete driver;
-                    ih >> driver;
-                    driver->setClientDescriptor(clientDescriptor);
-                    this->myTaxiCenter->addDriver(driver);
-                    numOfDrivers--;
+                    ThreadClient* threadHandler = new ThreadClient(this->myTaxiCenter, socket, this);
+                    pthread_create(&threads[i], NULL, connection_handler, (void*)threadHandler);
                 }
-                break;
             }
                 //this mission is for creating and adding a new trip to the game
             case 2: {

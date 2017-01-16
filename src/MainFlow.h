@@ -15,12 +15,14 @@
 #include "Grid.h"
 #include "StandardCab.h"
 #include "LuxuryCab.h"
-
+#include <pthread.h>
 class MainFlow {
 private:
     TaxiCenter* myTaxiCenter;
     Grid* grid;
     vector<Cab*> cabsVector;
+    //vector<pthread_t> threads;
+    pthread_t threads[];
     friend class boost::serialization::access;
 
     template<class Archive>
