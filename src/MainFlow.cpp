@@ -176,6 +176,7 @@ void MainFlow::mainFlow(int portNum){
                     ThreadClient* threadHandler = new ThreadClient(socket, this);
                     pthread_create(&threads[i], NULL, connectionHandler, (void*)threadHandler);
                 }
+                break;
             }
                 //this mission is for creating and adding a new trip to the game
             case 2: {
