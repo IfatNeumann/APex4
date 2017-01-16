@@ -176,7 +176,7 @@ void MainFlow::mainFlow(int portNum){
                     //receive the driver
                     ThreadClient* threadHandler = new ThreadClient(socket, this);
                     threadHandler->clientDescriptor = threadHandler->sock->acceptOneClient();
-                    pthread_create(&threads[i], NULL, connectionHandler, (void*)threadHandler);
+                    pthread_create(&threads[i], NULL, connectionHandler, threadHandler);
                 }
                 break;
             }
