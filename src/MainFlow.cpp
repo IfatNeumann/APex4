@@ -16,8 +16,7 @@ public:
     TaxiCenter* taxiCenter;
     Tcp* sock;
     MainFlow* flow;
-    ThreadClient(TaxiCenter* tc, Tcp* s, MainFlow* f){
-        this->taxiCenter = tc;
+    ThreadClient(Tcp* s, MainFlow* f){
         this->sock = s;
         this->flow = f;
     }
@@ -27,7 +26,7 @@ public:
 //
 // This will handle connection for each client
 //
-void *connection_handler(void *socket_desc) {
+void *connectionHandler(void *socket_desc) {
     ThreadClient* handler = (ThreadClient*)socket_desc;
     char buffer[4096];
     int clientDescriptor = handler->sock->acceptOneClient();
@@ -174,8 +173,8 @@ void MainFlow::mainFlow(int portNum){
                 cin >> numOfDrivers;
                 for(int i = 0; i < numOfDrivers; i++){
                     //receive the driver
-                    ThreadClient* threadHandler = new ThreadClient(this->myTaxiCenter, socket, this);
-                    pthread_create(&threads[i], NULL, connection_handler, (void*)threadHandler);
+                    ThreadClient* threadHandler = new ThreadClient(socket, this);
+                    pthread_create(&threads[i], NULL, connectionHandler, (void*)threadHandler);
                 }
             }
                 //this mission is for creating and adding a new trip to the game
