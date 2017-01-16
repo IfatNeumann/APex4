@@ -21,7 +21,6 @@ private:
     TaxiCenter* myTaxiCenter;
     Grid* grid;
     vector<Cab*> cabsVector;
-    //vector<pthread_t> threads;
     pthread_t threads[];
     friend class boost::serialization::access;
 

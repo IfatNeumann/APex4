@@ -16,9 +16,11 @@ public:
     TaxiCenter* taxiCenter;
     Tcp* sock;
     MainFlow* flow;
+    int clientDescriptor;
     ThreadClient(Tcp* s, MainFlow* f){
         this->sock = s;
         this->flow = f;
+        this->clientDescriptor;
     }
     ~ThreadClient(){}
 };
@@ -29,8 +31,7 @@ public:
 void *connectionHandler(void *socket_desc) {
     ThreadClient* handler = (ThreadClient*)socket_desc;
     char buffer[4096];
-    int clientDescriptor = handler->sock->acceptOneClient();
-    int dataSize = handler->sock->reciveData(buffer, 4096,clientDescriptor);
+    int dataSize = handler->sock->reciveData(buffer, 4096,handler->clientDescriptor);
     Driver *driver;
     boost::iostreams::basic_array_source<char> device(buffer, dataSize);
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
@@ -42,7 +43,7 @@ void *connectionHandler(void *socket_desc) {
     Cab* taxi = handler->flow->getCab(driver->getTaxiId());
 
     //send the taxi case number
-    handler->sock->sendData("2",clientDescriptor);
+    handler->sock->sendData("2",handler->clientDescriptor);
     //send the taxi
     std::string serial_str;
     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
@@ -50,7 +51,7 @@ void *connectionHandler(void *socket_desc) {
     boost::archive::binary_oarchive oa(s);
     oa << taxi;
     s.flush();
-    handler->sock->sendData(serial_str,clientDescriptor);
+    handler->sock->sendData(serial_str,handler->clientDescriptor);
     //serialize and send current point
     std::string serial_str3;
     boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
@@ -58,15 +59,15 @@ void *connectionHandler(void *socket_desc) {
     boost::archive::binary_oarchive oc(s4);
     oc << currentPoint;
     s4.flush();
-    handler->sock->sendData(serial_str3,clientDescriptor);
+    handler->sock->sendData(serial_str3,handler->clientDescriptor);
     //receive driver *with* his cab object
-    dataSize = handler->sock->reciveData(buffer,4096,clientDescriptor);
+    dataSize = handler->sock->reciveData(buffer,4096,handler->clientDescriptor);
     boost::iostreams::basic_array_source<char> device6(buffer,dataSize);
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s7(device6);
     boost::archive::binary_iarchive ih(s7);
     delete driver;
     ih >> driver;
-    driver->setClientDescriptor(clientDescriptor);
+    driver->setClientDescriptor(handler->clientDescriptor);
     handler->taxiCenter->addDriver(driver);
 
     pthread_exit(socket_desc);
@@ -174,6 +175,7 @@ void MainFlow::mainFlow(int portNum){
                 for(int i = 0; i < numOfDrivers; i++){
                     //receive the driver
                     ThreadClient* threadHandler = new ThreadClient(socket, this);
+                    threadHandler->clientDescriptor = threadHandler->sock->acceptOneClient();
                     pthread_create(&threads[i], NULL, connectionHandler, (void*)threadHandler);
                 }
                 break;
