@@ -96,6 +96,8 @@ int main(int argc,char* argv[]) {
             }
                 //move one step
             case (5): {
+
+                cout<<"client -move one step!"<<endl;
                 //receive next point
                 dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device4(buffer, dataSize);
@@ -106,6 +108,8 @@ int main(int argc,char* argv[]) {
                 }
                 ie >> nextPoint;
                 driver->setCurrentPoint(nextPoint);
+                cout<<"client -print point!"<<endl;
+                nextPoint->getPoint().printPoint();
                 if((endPoint!=NULL)&&(driver->getCurrentPoint()->getPoint().isEqualTo(endPoint->getPoint()))){
                     driver->setMyTripInfo(NULL);
                 }
