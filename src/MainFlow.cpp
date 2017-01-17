@@ -13,7 +13,6 @@ int mission;
 //int clientMission = 99;
 class ThreadClient{
 public:
-    TaxiCenter* taxiCenter;
     Tcp* sock;
     MainFlow* flow;
     int clientDescriptor;
@@ -31,6 +30,7 @@ public:
 void *connectionHandler(void *socket_desc) {
     ThreadClient* handler = (ThreadClient*)socket_desc;
     char buffer[4096];
+    bool thereIsTrip = false;
     int dataSize = handler->sock->reciveData(buffer, 4096,handler->clientDescriptor);
     cout<<"received driver data from client!"<<endl;
     Driver *driver;
@@ -75,32 +75,73 @@ void *connectionHandler(void *socket_desc) {
     delete driver;
     ih >> driver;
     driver->setClientDescriptor(handler->clientDescriptor);
-    handler->taxiCenter->addDriver(driver);
+    handler->flow->getTaxiCenter()->addDriver(driver);
 
-    while (mission!=7){
-        switch(mission){
-            case(9): {
-                //send new location (Node*)
-                Node *newLocation = handler->flow->getTaxiCenter()->
-                        getDriversVector().at(0)->getCurrentPoint();
-                //in case of a change in the location
-                if (currentPoint!=newLocation) {
-                    //sent the new location case number
-                    handler->sock->sendData("5", driver->getClientDescriptor());
-                    std::string serial_str4;
-                    boost::iostreams::back_insert_device<std::string> inserter4(serial_str4);
-                    boost::iostreams::stream<boost::iostreams::back_insert_device
-                            <std::string> > s5(inserter4);
-                    boost::archive::binary_oarchive od(s5);
-                    od << newLocation;
-                    s5.flush();
-                    handler->sock->sendData(serial_str4, driver->getClientDescriptor());
-                    //update current point
-                    currentPoint = newLocation;
+    while (mission!=7) {
+        switch (mission) {
+            case (9): {
+                //if there is a trip
+                if (driver->getMyTripInfo()!=NULL) {
+                    //initialize the trip's information
+                    if (thereIsTrip == false) {
+                        cout << "we got a trip!" << endl;
+                        //find destPoint
+                        Node *destPoint = handler->flow->getTaxiCenter()->getTripsVector().at(thereIsTrip)
+                                ->getEndingP();
+                        //sent the destination point case number
+                        handler->sock->sendData("4", driver->getClientDescriptor());
+                        //send the destination point
+                        std::string serial_str3;
+                        boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
+                        boost::iostreams::stream<boost::iostreams::back_insert_device
+                                <std::string> > s4(inserter3);
+                        boost::archive::binary_oarchive oc(s4);
+                        oc << destPoint;
+                        s4.flush();
+                        handler->sock->sendData(serial_str3, driver->getClientDescriptor());
+                        thereIsTrip=true;
+                        //sent the tripInfo case number
+                        handler->sock->sendData("3",driver->getClientDescriptor());
+                        //find the trip info
+
+                        cout<<"found trip info!"<<endl;
+                        TripInfo* tripInfo = handler->flow->getTaxiCenter()->getTripsVector().at(thereIsTrip);
+
+                        //send the tripInfo
+                        std::string serial_str2;
+                        boost::iostreams::back_insert_device<std::string> inserter2(serial_str2);
+                        boost::iostreams::stream<boost::iostreams::back_insert_device
+                                <std::string> > s3(inserter2);
+                        boost::archive::binary_oarchive ob(s3);
+                        ob << tripInfo;
+                        s3.flush();
+                        handler->sock->sendData(serial_str2,driver->getClientDescriptor());
+                    }
+
+                    //send new location (Node*)
+                    Node *newLocation = driver->getCurrentPoint();
+                    //in case of a change in the location
+                    if (currentPoint != newLocation) {
+                        //sent the new location case number
+                        cout << "send new location case number" << endl;
+                        handler->sock->sendData("5", driver->getClientDescriptor());
+                        std::string serial_str4;
+                        boost::iostreams::back_insert_device<std::string> inserter4(serial_str4);
+                        boost::iostreams::stream<boost::iostreams::back_insert_device
+                                <std::string> > s5(inserter4);
+                        boost::archive::binary_oarchive od(s5);
+                        od << newLocation;
+                        s5.flush();
+
+                        cout << "send the new location!" << endl;
+                        handler->sock->sendData(serial_str4, driver->getClientDescriptor());
+                        //update (local) current point
+                        currentPoint = newLocation;
+                    }
                 }
             }
-            }
         }
+    }
     cout<<"print taxi id!"<<endl;
     cout<<driver->getTaxiId()<<endl;
     cout<<"bye bye thread"<<endl;
@@ -249,45 +290,14 @@ void MainFlow::mainFlow(int portNum){
             }
             //this mission increase the time by one
             case 9: {
+                cout<<"case9!"<<endl;
                 time++;
                 int thereIsTrip = checkIfTimeToTrip(time);
                 this->getTaxiCenter()->startDriving();
-                //there has been a progress
-                newMission=true;
                 Driver* driver = this->myTaxiCenter->getDriverById(0);
                 //int thereIsTrip = checkIfTimeToTrip(time);
                 if(thereIsTrip!=-1){
-                    //find the trip info
-                    TripInfo* tripInfo = this->myTaxiCenter->getTripsVector().at(thereIsTrip);
-                    //sent the tripInfo case number
-                    socket->sendData("3",driver->getClientDescriptor());
-                    //send the tripInfo
-                    std::string serial_str2;
-                    boost::iostreams::back_insert_device<std::string> inserter2(serial_str2);
-                    boost::iostreams::stream<boost::iostreams::back_insert_device
-                            <std::string> > s3(inserter2);
-                    boost::archive::binary_oarchive ob(s3);
-                    ob << tripInfo;
-                    s3.flush();
-                    socket->sendData(serial_str2,driver->getClientDescriptor());
-
-                    //find destPoint
-                    Node* destPoint = this->myTaxiCenter->getTripsVector().at(thereIsTrip)
-                            ->getEndingP();
-                    //sent the destination point case number
-                    socket->sendData("4",driver->getClientDescriptor());
-                    //send the destination point
-                    std::string serial_str3;
-                    boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
-                    boost::iostreams::stream<boost::iostreams::back_insert_device
-                            <std::string> > s4(inserter3);
-                    boost::archive::binary_oarchive oc(s4);
-                    oc << destPoint;
-                    s4.flush();
-                    socket->sendData(serial_str3,driver->getClientDescriptor());
-
-                }
-
+                     }
                 break;
             }
         }
