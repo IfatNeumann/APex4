@@ -19,6 +19,7 @@ int main(int argc,char* argv[]) {
     TripInfo *tripInfo = NULL;
     Tcp* socket= new Tcp(false,portNum);
     socket->initialize();
+    cout<<"client initialized!"<<endl;
     int missionNum;
     int dataSize;
     Node *endPoint = NULL,*currentPoint, *nextPoint = NULL;
@@ -31,6 +32,7 @@ int main(int argc,char* argv[]) {
     oa << driver;
     s.flush();
     socket->sendData(serial_str,0);
+    cout<<"client sent driver!"<<endl;
 
     do {
         //receive mission number
@@ -40,6 +42,7 @@ int main(int argc,char* argv[]) {
         switch(missionNum) {
             //receive taxi
             case (2): {
+                cout<<"client received taxi!"<<endl;
                 dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
@@ -47,13 +50,16 @@ int main(int argc,char* argv[]) {
                 ia >> taxi;
                 driver->setTxCabInfo(taxi);
                 //receiving the current point
+                cout<<"client received current point!"<<endl;
                 dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device3(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s4(device3);
                 boost::archive::binary_iarchive ic(s4);
                 ic >> currentPoint;
+                currentPoint->getPoint().printPoint();
                 driver->setCurrentPoint(currentPoint);
                 //send driver *with* his taxi
+                cout<<"client send driver with taxi!"<<endl;
                 std::string serial_str8;
                 boost::iostreams::back_insert_device<std::string> inserter8(serial_str8);
                 boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s8(inserter8);
@@ -61,7 +67,6 @@ int main(int argc,char* argv[]) {
                 ob << driver;
                 s8.flush();
                 socket->sendData(serial_str8,0);
-
                 break;
             }
                 //receive tripInfo
