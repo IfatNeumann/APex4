@@ -20,7 +20,6 @@
 #include "ThreadClient.h"
 #include "../sockets/Tcp.h"
 
-
 class MainFlow {
 private:
     TaxiCenter* myTaxiCenter;
@@ -28,7 +27,6 @@ private:
     int mission;
     vector<Cab*> cabsVector;
     pthread_t threads[];
-    int time;
     friend class boost::serialization::access;
 
     template<class Archive>

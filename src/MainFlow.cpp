@@ -8,6 +8,7 @@
 #include <string.h>
 #include "Client.h"
 #include "Driver.h"
+int curr_time = 0;
 class ThreadClient{
 public:
     Tcp* sock;
@@ -90,15 +91,15 @@ void *connectionHandler(void *socket_desc) {
         //BOOST_LOG_TRIVIAL(debug)<<"**thread - changed to true!**"<<endl;
         switch (handler->flow->getMission()) {
             case (10): {
-                BOOST_LOG_TRIVIAL(debug)<<"**thread - hi!!**"<<endl;
+                //BOOST_LOG_TRIVIAL(debug)<<"**thread - hi!!**"<<endl;
                 //if there is a trip
 
                 //BOOST_LOG_TRIVIAL(debug)<<"**thread - changed to false!**"<<endl;
                 //handler->flow->setBoolVectorAt(driver->getId(),false);
                     //initialize the trip's information
-                    int thereIsTrip = handler->flow->checkIfTimeToTrip(handler->flow->getTime(),driver->getId());
-                    BOOST_LOG_TRIVIAL(debug)<<"therIsTrip "<<thereIsTrip<<endl;
-                    BOOST_LOG_TRIVIAL(debug)<<"time "<<handler->flow->getTime()<<endl;
+                    int thereIsTrip = handler->flow->checkIfTimeToTrip(curr_time,driver->getId());
+                    //BOOST_LOG_TRIVIAL(debug)<<"therIsTrip "<<thereIsTrip<<endl;
+                    //BOOST_LOG_TRIVIAL(debug)<<"time "<<handler->flow->getTime()<<endl;
                 //driver->getMyTripInfo()->getStartingP()->getPoint().printPoint();
                     handler->flow->getTaxiCenter()->startDriving(driver->getId());
                     //a trip needs to start
@@ -175,7 +176,6 @@ MainFlow::MainFlow(){
     this->threads;
     this->boolVector;
     this->mission;
-    this->time=0;
 
 }
 
@@ -251,7 +251,7 @@ void MainFlow::mainFlow(int portNum){
     char buffer[4096];
     Tcp* socket= new Tcp(true,portNum);
     socket->initialize();
-
+    cout<<"time in initialize"<<curr_time<<endl;
     cout<<"size in initialize"<<boolVector.size()<<endl;
     //entered the size of the grid (map)
     cin >> gridXAxe >> gridYAxe;
@@ -266,6 +266,8 @@ void MainFlow::mainFlow(int portNum){
     }
     int numOfDrivers=0;
     do{
+
+        cout<<"time in dowhile loop"<<curr_time<<endl;
         cin>>this->mission;
         switch (this->mission) {
             //this mission is for creating and adding a new driver to the game
@@ -275,15 +277,13 @@ void MainFlow::mainFlow(int portNum){
                     //receive the driver
                     ThreadClient* threadHandler = new ThreadClient(socket, this);
                     boolVector.push_back(true);
-                    cout<<"size after push1 "<<boolVector.size()<<endl;
                     threadHandler->clientDescriptor = threadHandler->sock->acceptOneClient();
-                    cout<<"size after push 2"<<boolVector.size()<<endl;
                     BOOST_LOG_TRIVIAL(debug)<<"mainflow - server accepted client!"<<endl;
-                    cout<<"size after push 3"<<boolVector.size()<<endl;
+                    cout<<"time afterpush3"<<curr_time<<endl;
                     pthread_create(&threads[i], NULL, connectionHandler, threadHandler);
-                    cout<<"size after push 4"<<boolVector.size()<<endl;
+                    cout<<"time afterpush4"<<curr_time<<endl;
                 }
-                cout<<"size after push after loop "<<boolVector.size()<<endl;
+                cout<<"time after push after loop "<<curr_time<<endl;
                 break;
             }
                 //this mission is for creating and adding a new trip to the game
@@ -319,6 +319,7 @@ void MainFlow::mainFlow(int portNum){
             }
             //this mission increase the time by one
             case 9: {
+                cout<<"time before++"<<curr_time<<endl;
                 int i;
                 while (!this->finish()) { /*cout<< "ifat is right"<<endl; */ }
                 //waiting for all the threads
@@ -328,7 +329,8 @@ void MainFlow::mainFlow(int portNum){
                     mainBool=setMainBool();
                 }*/
                 BOOST_LOG_TRIVIAL(debug)<<"mainflow - case9!" << endl;
-                time++;
+                curr_time++;
+                cout<<"time after++"<<curr_time<<endl;
                 for(int i = 0;i<boolVector.size();i++){
                     boolVector[i] = false;
                 }
@@ -348,9 +350,6 @@ void MainFlow::setBoolVectorAt(int i,bool state){
 }
 int MainFlow::getMission(){
     return this->mission;
-}
-int MainFlow::getTime(){
-    return this->time;
 }
 bool MainFlow::setMainBool(){
     for(int i=0;i<boolVector.size();i++) {
