@@ -39,7 +39,6 @@ private:
 
 public:
 
-    vector<bool> boolVector;
     /**
      * Constructor.
      */

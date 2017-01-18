@@ -9,6 +9,7 @@
 #include "Client.h"
 #include "Driver.h"
 int curr_time = 0;
+vector<bool> boolVector;
 class ThreadClient{
 public:
     Tcp* sock;
@@ -38,8 +39,7 @@ void *connectionHandler(void *socket_desc) {
     ia >> driver;
     cout<<driver->getId()<<endl;
     cout<<driver->getAge()<<endl;
-    cout <<"zise before set"<< handler->flow->boolVector.size()<<endl;
-    handler->flow->setBoolVectorAt(driver->getId(),true);
+    cout <<"zise before set"<< boolVector.size()<<endl;
     driver->setCurrentPoint(handler->flow->getGrid()->getNode(Point(0,0)));
     Node* currentPoint=driver->getCurrentPoint();
     //find the taxi
@@ -174,7 +174,6 @@ MainFlow::MainFlow(){
     this->grid;
     this->cabsVector;
     this->threads;
-    this->boolVector;
     this->mission;
 
 }
@@ -345,9 +344,9 @@ void MainFlow::mainFlow(int portNum){
     socket->sendData("7",driver->getClientDescriptor());
 }
 
-void MainFlow::setBoolVectorAt(int i,bool state){
-    this->boolVector[i]=state;
-}
+//void MainFlow::setBoolVectorAt(int i,bool state){
+//    boolVector[i]=state;
+//}
 int MainFlow::getMission(){
     return this->mission;
 }
