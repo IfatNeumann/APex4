@@ -93,8 +93,7 @@ void TaxiCenter::connectDriversToTrips(int indexOfTrip){
 
 
 
-    void TaxiCenter::startDriving(){
-        for(int i=0;i<this->driversList.size();i++){
+    void TaxiCenter::startDriving(int i){
             if(driversList[i]->getMyTripInfo()!=NULL) {
                 if (driversList[i]->getMyTripInfo()->getTripJustStart() == false) {
                     driversList[i]->setCurrentPoint(getTheNextNode(i));
@@ -108,8 +107,6 @@ void TaxiCenter::connectDriversToTrips(int indexOfTrip){
                     driversList[i]->setMyTripInfo(NULL);
                 }
             }
-        }
-
         }
 
 

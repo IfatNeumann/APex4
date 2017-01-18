@@ -102,7 +102,7 @@ public:
     /***
      * This function cause the trips to start and make the driver gets to the destination point of the trip
      */
-    void startDriving();
+    void startDriving(int i);
     void deleteTripThatEnd(int indexOfTrip);
     Node* getTheNextNode(int indexOfDriver);
 };

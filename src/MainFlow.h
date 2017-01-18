@@ -25,9 +25,11 @@ class MainFlow {
 private:
     TaxiCenter* myTaxiCenter;
     Grid* grid;
+    int mission;
     vector<Cab*> cabsVector;
     pthread_t threads[];
     vector<bool> boolVector;
+    int time;
     friend class boost::serialization::access;
 
     template<class Archive>
@@ -104,5 +106,7 @@ public:
     int checkIfTimeToTrip(int time);
     void mainFlow(int portNum);
     void setBoolVectorAt(int i, bool state);
+    int getMission();
+    int getTime();
 };
 #endif //APEX2_MAINFLOW_H

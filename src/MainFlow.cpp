@@ -28,7 +28,6 @@ void *connectionHandler(void *socket_desc) {
     ThreadClient* handler = (ThreadClient*)socket_desc;
     char buffer[4096];
     bool thereIsTrip = false;
-    int threadMission;
     int dataSize = handler->sock->reciveData(buffer, 4096,handler->clientDescriptor);
     BOOST_LOG_TRIVIAL(debug)<<"**thread - received driver data from client!**"<<endl;
     Driver *driver;
@@ -77,15 +76,17 @@ void *connectionHandler(void *socket_desc) {
     driver->setClientDescriptor(handler->clientDescriptor);
     handler->flow->getTaxiCenter()->addDriver(driver);
     driver->setMyTripInfo(NULL);
-    while (threadMission!=7) {
+    while (handler->flow->getMission()!=7) {
         handler->flow->setBoolVectorAt(driver->getId(),true);
-        switch (threadMission) {
+        switch (handler->flow->getMission()) {
             case (9): {
                 //if there is a trip
                 handler->flow->setBoolVectorAt(driver->getId(),false);
-                if (driver->getMyTripInfo()!=NULL) {
                     //initialize the trip's information
-                    if (thereIsTrip == false) {
+                    int thereIsTrip = handler->flow->checkIfTimeToTrip(handler->flow->getTime());
+                    handler->flow->getTaxiCenter()->startDriving(driver->getId());
+                    //a trip needs to start
+                    if (thereIsTrip!=-1){
                         BOOST_LOG_TRIVIAL(debug) << "thread - we got a trip!" << endl;
                         //find destPoint
                         Node *destPoint = handler->flow->getTaxiCenter()->getTripsVector().at(thereIsTrip)
@@ -143,7 +144,7 @@ void *connectionHandler(void *socket_desc) {
                     }
                 }
             }
-        }
+
     }
     BOOST_LOG_TRIVIAL(debug)<<"thread - print taxi id!"<<endl;
     BOOST_LOG_TRIVIAL(debug)<<driver->getTaxiId()<<endl;
@@ -157,6 +158,8 @@ MainFlow::MainFlow(){
     this->cabsVector;
     this->threads;
     this->boolVector;
+    this->mission;
+    this->time=0;
 }
 
 MainFlow::~MainFlow() {
@@ -224,8 +227,6 @@ int MainFlow::checkIfTimeToTrip(int time){
 }
 
 void MainFlow::mainFlow(int portNum){
-    int mission;
-    int time=0;
     int gridXAxe,gridYAxe,numOfObstacles;
     int xPoint,yPoint;
     char dummy;
@@ -247,15 +248,15 @@ void MainFlow::mainFlow(int portNum){
     }
     int numOfDrivers=0;
     do{
-        cin>>mission;
-        switch (mission) {
+        cin>>this->mission;
+        switch (this->mission) {
             //this mission is for creating and adding a new driver to the game
             case 1: {
                 cin >> numOfDrivers;
                 for(int i =0  ; i < numOfDrivers; i++){
                     //receive the driver
                     ThreadClient* threadHandler = new ThreadClient(socket, this);
-                    boolVector[i]=false;
+                    boolVector.push_back(false);
                     threadHandler->clientDescriptor = threadHandler->sock->acceptOneClient();
                     BOOST_LOG_TRIVIAL(debug)<<"mainflow - server accepted client!"<<endl;
                     pthread_create(&threads[i], NULL, connectionHandler, threadHandler);
@@ -309,15 +310,11 @@ void MainFlow::mainFlow(int portNum){
                 }
                 BOOST_LOG_TRIVIAL(debug)<<"mainflow - case9!"<<endl;
                 time++;
-                int thereIsTrip = checkIfTimeToTrip(time);
-                this->getTaxiCenter()->startDriving();
-                Driver* driver = this->myTaxiCenter->getDriverById(0);
-                //int thereIsTrip = checkIfTimeToTrip(time);
                 break;
             }
         }
         //if the user press 7 the game will end
-    }while(mission!=7);
+    }while(this->mission!=7);
     Driver* driver = this->myTaxiCenter->getDriverById(0);
     //sent the delete case number
     socket->sendData("7",driver->getClientDescriptor());
@@ -325,4 +322,10 @@ void MainFlow::mainFlow(int portNum){
 
 void MainFlow::setBoolVectorAt(int i,bool state){
     this->boolVector[i]=state;
+}
+int MainFlow::getMission(){
+    return this->mission;
+}
+int MainFlow::getTime(){
+    return this->time;
 }
