@@ -30,7 +30,7 @@ void *connectionHandler(void *socket_desc) {
     bool thereIsTrip = false;
     int threadMission;
     int dataSize = handler->sock->reciveData(buffer, 4096,handler->clientDescriptor);
-    cout<<"thread - received driver data from client!"<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<"**thread - received driver data from client!**"<<endl;
     Driver *driver;
     boost::iostreams::basic_array_source<char> device(buffer, dataSize);
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
@@ -40,14 +40,15 @@ void *connectionHandler(void *socket_desc) {
     Node* currentPoint=driver->getCurrentPoint();
     //find the taxi
 
-    cout<<"thread - find the right taxi!"<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<"thread - find the right taxi!"<<endl;
     Cab* taxi = handler->flow->getCab(driver->getTaxiId());
 
     //send the taxi case number
+
+    BOOST_LOG_TRIVIAL(debug)<<"**thread - send 2!**"<<endl;
     handler->sock->sendData("2",handler->clientDescriptor);
     //send the taxi
 
-    cout<<"thread - send taxi!"<<endl;
     std::string serial_str;
     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
     boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
@@ -55,8 +56,8 @@ void *connectionHandler(void *socket_desc) {
     oa << taxi;
     s.flush();
     handler->sock->sendData(serial_str,handler->clientDescriptor);
+    BOOST_LOG_TRIVIAL(debug)<<"**thread - send taxi!**"<<endl;
     //serialize and send current point
-    cout<<"thread - send current point!"<<endl;
     std::string serial_str3;
     boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
     boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s4(inserter3);
@@ -64,20 +65,19 @@ void *connectionHandler(void *socket_desc) {
     oc << currentPoint;
     s4.flush();
     handler->sock->sendData(serial_str3,handler->clientDescriptor);
+    BOOST_LOG_TRIVIAL(debug)<<"**thread - send current point!**"<<endl;
     //receive driver *with* his cab object
-    cout<<"thread - received driver with taxi from client!"<<endl;
     dataSize = handler->sock->reciveData(buffer,4096,handler->clientDescriptor);
     boost::iostreams::basic_array_source<char> device6(buffer,dataSize);
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s7(device6);
     boost::archive::binary_iarchive ih(s7);
     delete driver;
     ih >> driver;
+    BOOST_LOG_TRIVIAL(debug)<<"**thread - received driver with taxi from client!**"<<endl;
     driver->setClientDescriptor(handler->clientDescriptor);
     handler->flow->getTaxiCenter()->addDriver(driver);
+    driver->setMyTripInfo(NULL);
 
-
-    threadMission=handler->flow->getQueuesArray(driver->getId()).front();
-    handler->flow->getQueuesArray(driver->getId()).pop();
     while (threadMission!=7) {
         switch (threadMission) {
             case (9): {
@@ -85,7 +85,7 @@ void *connectionHandler(void *socket_desc) {
                 if (driver->getMyTripInfo()!=NULL) {
                     //initialize the trip's information
                     if (thereIsTrip == false) {
-                        cout << "thread - we got a trip!" << endl;
+                        BOOST_LOG_TRIVIAL(debug) << "thread - we got a trip!" << endl;
                         //find destPoint
                         Node *destPoint = handler->flow->getTaxiCenter()->getTripsVector().at(thereIsTrip)
                                 ->getEndingP();
@@ -93,21 +93,19 @@ void *connectionHandler(void *socket_desc) {
                         handler->sock->sendData("4", driver->getClientDescriptor());
                         //send the destination point
 
-                        cout<<"thread - send dest point!"<<endl;
                         std::string serial_str3;
                         boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
                         boost::iostreams::stream<boost::iostreams::back_insert_device
                                 <std::string> > s4(inserter3);
                         boost::archive::binary_oarchive oc(s4);
                         oc << destPoint;
+                        BOOST_LOG_TRIVIAL(debug)<<"thread - sent dest point!"<<endl;
                         s4.flush();
                         handler->sock->sendData(serial_str3, driver->getClientDescriptor());
                         thereIsTrip=true;
                         //sent the tripInfo case number
                         handler->sock->sendData("3",driver->getClientDescriptor());
                         //find the trip info
-
-                        cout<<"thread - send trip info!"<<endl;
                         TripInfo* tripInfo = handler->flow->getTaxiCenter()->getTripsVector().at(thereIsTrip);
 
                         //send the tripInfo
@@ -117,6 +115,7 @@ void *connectionHandler(void *socket_desc) {
                                 <std::string> > s3(inserter2);
                         boost::archive::binary_oarchive ob(s3);
                         ob << tripInfo;
+                        BOOST_LOG_TRIVIAL(debug)<<"thread - send trip info!"<<endl;
                         s3.flush();
                         handler->sock->sendData(serial_str2,driver->getClientDescriptor());
                     }
@@ -126,7 +125,7 @@ void *connectionHandler(void *socket_desc) {
                     //in case of a change in the location
                     if (currentPoint != newLocation) {
                         //sent the new location case number
-                        cout << "thread - send new location case number" << endl;
+                        BOOST_LOG_TRIVIAL(debug) << "thread - send new location case number" << endl;
                         handler->sock->sendData("5", driver->getClientDescriptor());
                         std::string serial_str4;
                         boost::iostreams::back_insert_device<std::string> inserter4(serial_str4);
@@ -136,7 +135,7 @@ void *connectionHandler(void *socket_desc) {
                         od << newLocation;
                         s5.flush();
 
-                        cout << "thread - send the new location!" << endl;
+                        BOOST_LOG_TRIVIAL(debug) << "thread - send the new location!" << endl;
                         handler->sock->sendData(serial_str4, driver->getClientDescriptor());
                         //update (local) current point
                         currentPoint = newLocation;
@@ -144,16 +143,10 @@ void *connectionHandler(void *socket_desc) {
                 }
             }
         }
-        //en empty loop until we receive the next mission
-        while(handler->flow->getQueuesArray(driver->getId()).empty()){
-
-        }
-        threadMission=handler->flow->getQueuesArray(driver->getId()).front();
-        handler->flow->getQueuesArray(driver->getId()).pop();
     }
-    cout<<"thread - print taxi id!"<<endl;
-    cout<<driver->getTaxiId()<<endl;
-    cout<<"thread - bye bye thread"<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<"thread - print taxi id!"<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<driver->getTaxiId()<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<"thread - bye bye thread"<<endl;
     pthread_exit(socket_desc);
 }
 
@@ -162,7 +155,7 @@ MainFlow::MainFlow(){
     this->grid;
     this->cabsVector;
     this->threads;
-    this->queuesArray;
+    this->boolVector;
 }
 
 MainFlow::~MainFlow() {
@@ -235,6 +228,7 @@ void MainFlow::mainFlow(int portNum){
     int gridXAxe,gridYAxe,numOfObstacles;
     int xPoint,yPoint;
     char dummy;
+    bool mainBool=false;
     char buffer[4096];
     Tcp* socket= new Tcp(true,portNum);
     socket->initialize();
@@ -250,7 +244,6 @@ void MainFlow::mainFlow(int portNum){
         this->getGrid()->getNode(Point(xPoint,yPoint))->setIsObstacle();
         numOfObstacles--;
     }
-
     int numOfDrivers=0;
     do{
         cin>>mission;
@@ -261,9 +254,9 @@ void MainFlow::mainFlow(int portNum){
                 for(int i =0  ; i < numOfDrivers; i++){
                     //receive the driver
                     ThreadClient* threadHandler = new ThreadClient(socket, this);
+                    boolVector[i]=false;
                     threadHandler->clientDescriptor = threadHandler->sock->acceptOneClient();
-
-                    cout<<"mainflow - server accepted client!"<<endl;
+                    BOOST_LOG_TRIVIAL(debug)<<"mainflow - server accepted client!"<<endl;
                     pthread_create(&threads[i], NULL, connectionHandler, threadHandler);
                 }
                 break;
@@ -301,15 +294,24 @@ void MainFlow::mainFlow(int portNum){
             }
             //this mission increase the time by one
             case 9: {
-                cout<<"mainflow - case9!"<<endl;
+                int i;
+                //waiting for all the threads
+                while(mainBool==false){
+                    for(i=0;i<boolVector.size();i++){
+                        if(boolVector[i]==false)
+                            break;
+                        else{
+                            mainBool=true;
+                            break;
+                        }
+                    }
+                }
+                BOOST_LOG_TRIVIAL(debug)<<"mainflow - case9!"<<endl;
                 time++;
                 int thereIsTrip = checkIfTimeToTrip(time);
                 this->getTaxiCenter()->startDriving();
                 Driver* driver = this->myTaxiCenter->getDriverById(0);
                 //int thereIsTrip = checkIfTimeToTrip(time);
-                for(int i=0;i<numOfDrivers;i++){
-                    queuesArray[i].push(mission);
-                }
                 break;
             }
         }
@@ -319,5 +321,4 @@ void MainFlow::mainFlow(int portNum){
     //sent the delete case number
     socket->sendData("7",driver->getClientDescriptor());
 }
-
 

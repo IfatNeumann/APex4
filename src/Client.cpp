@@ -4,6 +4,7 @@
 #include "StandardCab.h"
 #include "LuxuryCab.h"
 #include <boost/serialization/export.hpp>
+#include <boost/log/trivial.hpp>
 BOOST_CLASS_EXPORT_GUID(StandardCab,"StandardCab")
 BOOST_CLASS_EXPORT_GUID(LuxuryCab,"LuxuryCab")
 using namespace std;
@@ -19,7 +20,7 @@ int main(int argc,char* argv[]) {
     TripInfo *tripInfo = NULL;
     Tcp* socket= new Tcp(false,portNum);
     socket->initialize();
-    cout<<"client initialized!"<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<"client initialized!"<<endl;
     int missionNum;
     int dataSize;
     Node *endPoint = NULL,*currentPoint, *nextPoint = NULL;
@@ -32,7 +33,7 @@ int main(int argc,char* argv[]) {
     oa << driver;
     s.flush();
     socket->sendData(serial_str,0);
-    cout<<"client sent driver!"<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<"client sent driver!"<<endl;
 
     do {
         //receive mission number
@@ -42,29 +43,29 @@ int main(int argc,char* argv[]) {
         switch(missionNum) {
             //receive taxi
             case (2): {
-                cout<<"client received taxi!"<<endl;
                 dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
                 boost::archive::binary_iarchive ia(s2);
                 ia >> taxi;
+                BOOST_LOG_TRIVIAL(debug)<<"client received taxi!"<<endl;
                 driver->setTxCabInfo(taxi);
                 //receiving the current point
-                cout<<"client received current point!"<<endl;
                 dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device3(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s4(device3);
                 boost::archive::binary_iarchive ic(s4);
                 ic >> currentPoint;
+                BOOST_LOG_TRIVIAL(debug)<<"client received current point!"<<endl;
                 currentPoint->getPoint().printPoint();
                 driver->setCurrentPoint(currentPoint);
                 //send driver *with* his taxi
-                cout<<"client send driver with taxi!"<<endl;
                 std::string serial_str8;
                 boost::iostreams::back_insert_device<std::string> inserter8(serial_str8);
                 boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s8(inserter8);
                 boost::archive::binary_oarchive ob(s8);
                 ob << driver;
+                BOOST_LOG_TRIVIAL(debug)<<"client send driver with taxi!"<<endl;
                 s8.flush();
                 socket->sendData(serial_str8,0);
                 break;
@@ -97,7 +98,7 @@ int main(int argc,char* argv[]) {
                 //move one step
             case (5): {
 
-                cout<<"client -move one step!"<<endl;
+                BOOST_LOG_TRIVIAL(debug)<<"client -move one step!"<<endl;
                 //receive next point
                 dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device4(buffer, dataSize);
@@ -108,7 +109,7 @@ int main(int argc,char* argv[]) {
                 }
                 ie >> nextPoint;
                 driver->setCurrentPoint(nextPoint);
-                cout<<"client -print point!"<<endl;
+                BOOST_LOG_TRIVIAL(debug)<<"client -print point!"<<endl;
                 nextPoint->getPoint().printPoint();
                 if((endPoint!=NULL)&&(driver->getCurrentPoint()->getPoint().isEqualTo(endPoint->getPoint()))){
                     driver->setMyTripInfo(NULL);

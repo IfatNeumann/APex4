@@ -22,7 +22,7 @@ Driver::Driver(int id, int age, MaritalStatus martialSta, int yrsOfExp, int taxi
     this->myTripInfo=NULL;
     this->currentPoint=NULL;
     this->ifAvailable = true;
-    this->clientDescriptor;
+    this->clientDescriptor=0;
 }
 
 /**

@@ -4,8 +4,9 @@ project(APex4)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
 set(BOOST_ROOT CACHE PATH "/usr/include/boost/")
-find_package(Boost 1.58.0 COMPONENTS serialization system)
+find_package(Boost 1.58.0 COMPONENTS serialization system log)
 include_directories(${Boost_INCLUDE_DIR})
+add_definitions(-DBOOST_ALL_DYN_LINK)
 
 set(core_sockets sockets/Socket.cpp sockets/Socket.h sockets/Udp.cpp sockets/Udp.h sockets/Tcp.cpp sockets/Tcp.h)
 add_library(sockets ${core_sockets})

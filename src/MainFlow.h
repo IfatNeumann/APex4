@@ -8,6 +8,7 @@
 #ifndef APEX2_MAINFLOW_H
 #define APEX2_MAINFLOW_H
 
+#include <boost/log/trivial.hpp>
 #include <cstdlib>
 #include <vector>
 #include "TaxiCenter.h"
@@ -26,7 +27,7 @@ private:
     Grid* grid;
     vector<Cab*> cabsVector;
     pthread_t threads[];
-    queue<int> queuesArray[];
+    vector<bool> boolVector;
     friend class boost::serialization::access;
 
     template<class Archive>
@@ -102,8 +103,5 @@ public:
     Grid* getGrid();
     int checkIfTimeToTrip(int time);
     void mainFlow(int portNum);
-    queue<int> getQueuesArray(int i){
-        return queuesArray[i];
-    }
 };
 #endif //APEX2_MAINFLOW_H
