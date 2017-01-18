@@ -103,5 +103,6 @@ public:
     Grid* getGrid();
     int checkIfTimeToTrip(int time);
     void mainFlow(int portNum);
+    void setBoolVectorAt(int i, bool state);
 };
 #endif //APEX2_MAINFLOW_H

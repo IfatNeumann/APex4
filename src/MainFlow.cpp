@@ -77,11 +77,12 @@ void *connectionHandler(void *socket_desc) {
     driver->setClientDescriptor(handler->clientDescriptor);
     handler->flow->getTaxiCenter()->addDriver(driver);
     driver->setMyTripInfo(NULL);
-
     while (threadMission!=7) {
+        handler->flow->setBoolVectorAt(driver->getId(),true);
         switch (threadMission) {
             case (9): {
                 //if there is a trip
+                handler->flow->setBoolVectorAt(driver->getId(),false);
                 if (driver->getMyTripInfo()!=NULL) {
                     //initialize the trip's information
                     if (thereIsTrip == false) {
@@ -322,3 +323,6 @@ void MainFlow::mainFlow(int portNum){
     socket->sendData("7",driver->getClientDescriptor());
 }
 
+void MainFlow::setBoolVectorAt(int i,bool state){
+    this->boolVector[i]=state;
+}
