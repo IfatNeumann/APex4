@@ -81,7 +81,7 @@ public:
      * @param indexOfTrip the index of the trip at the trips vector that we are search the driver for him.
      * @return the index of the closest taxi or -1 if there is no available driver
      */
-    int srcClosestTaxiDriver(int indexOfTrip);
+    int srcClosestTaxiDriver(int indexOfTrip,int i);
 
     /**
      * This passenger updating the Driver's current passengers vector be creating a vector of Passenger
@@ -97,7 +97,7 @@ public:
     /**
      * This function sets the trips in the drivers that mach them.
      */
-    void connectDriversToTrips(int indexOfTrip);
+    void connectDriversToTrips(int indexOfTrip,int driverId);
 
     /***
      * This function cause the trips to start and make the driver gets to the destination point of the trip

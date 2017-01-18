@@ -28,7 +28,6 @@ private:
     int mission;
     vector<Cab*> cabsVector;
     pthread_t threads[];
-    vector<bool> boolVector;
     int time;
     friend class boost::serialization::access;
 
@@ -41,6 +40,8 @@ private:
     }
 
 public:
+
+    vector<bool> boolVector;
     /**
      * Constructor.
      */
@@ -103,10 +104,12 @@ public:
      * @return grid
      */
     Grid* getGrid();
-    int checkIfTimeToTrip(int time);
+    int checkIfTimeToTrip(int time,int driverId);
     void mainFlow(int portNum);
     void setBoolVectorAt(int i, bool state);
     int getMission();
     int getTime();
+    bool setMainBool();
+    bool finish();
 };
 #endif //APEX2_MAINFLOW_H

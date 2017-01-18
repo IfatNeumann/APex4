@@ -34,15 +34,19 @@ int main(int argc,char* argv[]) {
     s.flush();
     socket->sendData(serial_str,0);
     BOOST_LOG_TRIVIAL(debug)<<"client sent driver!"<<endl;
-
+    BOOST_LOG_TRIVIAL(debug)<<buffer<<endl;
     do {
         //receive mission number
+        memset(buffer,0,4096);
         dataSize = socket->reciveData(buffer, 4096,0);
         string missionNumString = string(buffer);
         missionNum = stoi(missionNumString);
+        cout<<missionNum<<endl;
         switch(missionNum) {
             //receive taxi
             case (2): {
+                cout << "BREAK1!" << endl;
+                memset(buffer,0,4096);
                 dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
@@ -50,7 +54,9 @@ int main(int argc,char* argv[]) {
                 ia >> taxi;
                 BOOST_LOG_TRIVIAL(debug)<<"client received taxi!"<<endl;
                 driver->setTxCabInfo(taxi);
+    		cout << "BREAK2!" << endl;
                 //receiving the current point
+                memset(buffer,0,sizeof(buffer));
                 dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device3(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s4(device3);
@@ -72,6 +78,7 @@ int main(int argc,char* argv[]) {
             }
                 //receive tripInfo
             case (3): {
+                memset(buffer,0,sizeof(buffer));
                 dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device2(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s3(device2);
@@ -85,6 +92,7 @@ int main(int argc,char* argv[]) {
             }
                 //receive destination point
             case (4): {
+                memset(buffer,0,sizeof(buffer));
                 dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device3(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s4(device3);
@@ -100,6 +108,7 @@ int main(int argc,char* argv[]) {
 
                 BOOST_LOG_TRIVIAL(debug)<<"client -move one step!"<<endl;
                 //receive next point
+                memset(buffer,0,sizeof(buffer));
                 dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device4(buffer, dataSize);
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s5(device4);

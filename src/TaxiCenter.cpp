@@ -54,14 +54,12 @@ void TaxiCenter::answerPhone(Point* source, Point* dest, int numOfPassengers){
 }
 
 
-int TaxiCenter::srcClosestTaxiDriver(int indexOfTrip) {
-     for (int i = 0; i <driversList.size();i++) {
+int TaxiCenter::srcClosestTaxiDriver(int indexOfTrip, int i) {
           if ((this->tripsList[indexOfTrip]->getStartingP()->getPoint().isEqualTo
                   (this->driversList[i]->getCurrentPoint()->getPoint()))&&
                   (this->driversList[i]->getIfAvailable())){
               this->driversList[i]->setIfAvailable(false);
               return i;
-          }
           }
     return -1;
 }
@@ -76,8 +74,8 @@ void TaxiCenter::updateDriverPassengers(Driver* closestTaxi, Node* costmSource, 
     closestTaxi->setTotalCustomersNum();
 }
 
-void TaxiCenter::connectDriversToTrips(int indexOfTrip){
-            int indexOfDriver = srcClosestTaxiDriver(indexOfTrip);
+void TaxiCenter::connectDriversToTrips(int indexOfTrip,int driverId){
+            int indexOfDriver = srcClosestTaxiDriver(indexOfTrip,driverId);
             if (indexOfDriver != -1) {
                 this->driversList[indexOfDriver]->setMyTripInfo(this->tripsList[indexOfTrip]);
                 updateDriverPassengers(this->driversList[indexOfDriver],

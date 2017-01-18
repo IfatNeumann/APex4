@@ -27,7 +27,7 @@ public:
 void *connectionHandler(void *socket_desc) {
     ThreadClient* handler = (ThreadClient*)socket_desc;
     char buffer[4096];
-    bool thereIsTrip = false;
+    memset(buffer,0,sizeof(buffer));
     int dataSize = handler->sock->reciveData(buffer, 4096,handler->clientDescriptor);
     BOOST_LOG_TRIVIAL(debug)<<"**thread - received driver data from client!**"<<endl;
     Driver *driver;
@@ -35,6 +35,10 @@ void *connectionHandler(void *socket_desc) {
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
     boost::archive::binary_iarchive ia(s2);
     ia >> driver;
+    cout<<driver->getId()<<endl;
+    cout<<driver->getAge()<<endl;
+    cout <<"zise before set"<< handler->flow->boolVector.size()<<endl;
+    handler->flow->setBoolVectorAt(driver->getId(),true);
     driver->setCurrentPoint(handler->flow->getGrid()->getNode(Point(0,0)));
     Node* currentPoint=driver->getCurrentPoint();
     //find the taxi
@@ -54,6 +58,7 @@ void *connectionHandler(void *socket_desc) {
     boost::archive::binary_oarchive oa(s);
     oa << taxi;
     s.flush();
+    cout<<serial_str<<endl;
     handler->sock->sendData(serial_str,handler->clientDescriptor);
     BOOST_LOG_TRIVIAL(debug)<<"**thread - send taxi!**"<<endl;
     //serialize and send current point
@@ -66,6 +71,7 @@ void *connectionHandler(void *socket_desc) {
     handler->sock->sendData(serial_str3,handler->clientDescriptor);
     BOOST_LOG_TRIVIAL(debug)<<"**thread - send current point!**"<<endl;
     //receive driver *with* his cab object
+    memset(buffer,0,sizeof(buffer));
     dataSize = handler->sock->reciveData(buffer,4096,handler->clientDescriptor);
     boost::iostreams::basic_array_source<char> device6(buffer,dataSize);
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s7(device6);
@@ -75,15 +81,25 @@ void *connectionHandler(void *socket_desc) {
     BOOST_LOG_TRIVIAL(debug)<<"**thread - received driver with taxi from client!**"<<endl;
     driver->setClientDescriptor(handler->clientDescriptor);
     handler->flow->getTaxiCenter()->addDriver(driver);
-    driver->setMyTripInfo(NULL);
+    //driver->setMyTripInfo(NULL);
+    //handler->flow->setBoolVectorAt(driver->getId(),true);
+
     while (handler->flow->getMission()!=7) {
-        handler->flow->setBoolVectorAt(driver->getId(),true);
+        //handler->flow->setBoolVectorAt(driver->getId(),true);
+
+        //BOOST_LOG_TRIVIAL(debug)<<"**thread - changed to true!**"<<endl;
         switch (handler->flow->getMission()) {
-            case (9): {
+            case (10): {
+                BOOST_LOG_TRIVIAL(debug)<<"**thread - hi!!**"<<endl;
                 //if there is a trip
-                handler->flow->setBoolVectorAt(driver->getId(),false);
+
+                //BOOST_LOG_TRIVIAL(debug)<<"**thread - changed to false!**"<<endl;
+                //handler->flow->setBoolVectorAt(driver->getId(),false);
                     //initialize the trip's information
-                    int thereIsTrip = handler->flow->checkIfTimeToTrip(handler->flow->getTime());
+                    int thereIsTrip = handler->flow->checkIfTimeToTrip(handler->flow->getTime(),driver->getId());
+                    BOOST_LOG_TRIVIAL(debug)<<"therIsTrip "<<thereIsTrip<<endl;
+                    BOOST_LOG_TRIVIAL(debug)<<"time "<<handler->flow->getTime()<<endl;
+                //driver->getMyTripInfo()->getStartingP()->getPoint().printPoint();
                     handler->flow->getTaxiCenter()->startDriving(driver->getId());
                     //a trip needs to start
                     if (thereIsTrip!=-1){
@@ -160,6 +176,7 @@ MainFlow::MainFlow(){
     this->boolVector;
     this->mission;
     this->time=0;
+
 }
 
 MainFlow::~MainFlow() {
@@ -214,12 +231,12 @@ Cab* MainFlow::getCab(int texiId) {
     }
 }
 
-int MainFlow::checkIfTimeToTrip(int time){
+int MainFlow::checkIfTimeToTrip(int time,int driverId){
     for(int i=0; i<this->myTaxiCenter->getTripsVector().size();i++) {
         if(this->myTaxiCenter->getTripsVector().at(i)!=NULL&&
                 this->myTaxiCenter->getTripsVector().at(i)->getTimeOfStart()==time&&
                 this->myTaxiCenter->getTripsVector().at(i)->getHaveDriver()== false){
-            this->myTaxiCenter->connectDriversToTrips(i);
+            this->myTaxiCenter->connectDriversToTrips(i,driverId);
             return i;
         }
     }
@@ -235,6 +252,7 @@ void MainFlow::mainFlow(int portNum){
     Tcp* socket= new Tcp(true,portNum);
     socket->initialize();
 
+    cout<<"size in initialize"<<boolVector.size()<<endl;
     //entered the size of the grid (map)
     cin >> gridXAxe >> gridYAxe;
     this->createGrid(gridXAxe,gridYAxe);
@@ -256,11 +274,16 @@ void MainFlow::mainFlow(int portNum){
                 for(int i =0  ; i < numOfDrivers; i++){
                     //receive the driver
                     ThreadClient* threadHandler = new ThreadClient(socket, this);
-                    boolVector.push_back(false);
+                    boolVector.push_back(true);
+                    cout<<"size after push1 "<<boolVector.size()<<endl;
                     threadHandler->clientDescriptor = threadHandler->sock->acceptOneClient();
+                    cout<<"size after push 2"<<boolVector.size()<<endl;
                     BOOST_LOG_TRIVIAL(debug)<<"mainflow - server accepted client!"<<endl;
+                    cout<<"size after push 3"<<boolVector.size()<<endl;
                     pthread_create(&threads[i], NULL, connectionHandler, threadHandler);
+                    cout<<"size after push 4"<<boolVector.size()<<endl;
                 }
+                cout<<"size after push after loop "<<boolVector.size()<<endl;
                 break;
             }
                 //this mission is for creating and adding a new trip to the game
@@ -297,19 +320,19 @@ void MainFlow::mainFlow(int portNum){
             //this mission increase the time by one
             case 9: {
                 int i;
+                while (!this->finish()) { /*cout<< "ifat is right"<<endl; */ }
                 //waiting for all the threads
-                while(mainBool==false){
-                    for(i=0;i<boolVector.size();i++){
-                        if(boolVector[i]==false)
-                            break;
-                        else{
-                            mainBool=true;
-                            break;
-                        }
-                    }
-                }
-                BOOST_LOG_TRIVIAL(debug)<<"mainflow - case9!"<<endl;
+                //this->mission = 10;
+                ///mainBool=false;
+                /*while(mainBool==false){
+                    mainBool=setMainBool();
+                }*/
+                BOOST_LOG_TRIVIAL(debug)<<"mainflow - case9!" << endl;
                 time++;
+                for(int i = 0;i<boolVector.size();i++){
+                    boolVector[i] = false;
+                }
+                this->mission = 10;
                 break;
             }
         }
@@ -328,4 +351,20 @@ int MainFlow::getMission(){
 }
 int MainFlow::getTime(){
     return this->time;
+}
+bool MainFlow::setMainBool(){
+    for(int i=0;i<boolVector.size();i++) {
+        if (boolVector[i] == false)
+            return false;
+    }
+    return true;
+}
+
+bool MainFlow::finish(){
+    cout<<"size "<<boolVector.size()<<endl;
+    for(int i=0; i<boolVector.size(); i++){
+        if(boolVector[i] == false)
+            return false;
+    }
+    return true;
 }
