@@ -8,9 +8,6 @@
 #include <string.h>
 #include "Client.h"
 #include "Driver.h"
-#include "../sockets/Tcp.h"
-int mission;
-//int clientMission = 99;
 class ThreadClient{
 public:
     Tcp* sock;
@@ -31,6 +28,7 @@ void *connectionHandler(void *socket_desc) {
     ThreadClient* handler = (ThreadClient*)socket_desc;
     char buffer[4096];
     bool thereIsTrip = false;
+    int threadMission;
     int dataSize = handler->sock->reciveData(buffer, 4096,handler->clientDescriptor);
     cout<<"thread - received driver data from client!"<<endl;
     Driver *driver;
@@ -77,8 +75,11 @@ void *connectionHandler(void *socket_desc) {
     driver->setClientDescriptor(handler->clientDescriptor);
     handler->flow->getTaxiCenter()->addDriver(driver);
 
-    while (mission!=7) {
-        switch (mission) {
+
+    threadMission=handler->flow->getQueuesArray(driver->getId()).front();
+    handler->flow->getQueuesArray(driver->getId()).pop();
+    while (threadMission!=7) {
+        switch (threadMission) {
             case (9): {
                 //if there is a trip
                 if (driver->getMyTripInfo()!=NULL) {
@@ -143,6 +144,12 @@ void *connectionHandler(void *socket_desc) {
                 }
             }
         }
+        //en empty loop until we receive the next mission
+        while(handler->flow->getQueuesArray(driver->getId()).empty()){
+
+        }
+        threadMission=handler->flow->getQueuesArray(driver->getId()).front();
+        handler->flow->getQueuesArray(driver->getId()).pop();
     }
     cout<<"thread - print taxi id!"<<endl;
     cout<<driver->getTaxiId()<<endl;
@@ -155,6 +162,7 @@ MainFlow::MainFlow(){
     this->grid;
     this->cabsVector;
     this->threads;
+    this->queuesArray;
 }
 
 MainFlow::~MainFlow() {
@@ -222,6 +230,7 @@ int MainFlow::checkIfTimeToTrip(int time){
 }
 
 void MainFlow::mainFlow(int portNum){
+    int mission;
     int time=0;
     int gridXAxe,gridYAxe,numOfObstacles;
     int xPoint,yPoint;
@@ -242,19 +251,19 @@ void MainFlow::mainFlow(int portNum){
         numOfObstacles--;
     }
 
+    int numOfDrivers=0;
     do{
         cin>>mission;
         switch (mission) {
             //this mission is for creating and adding a new driver to the game
             case 1: {
-                int numOfDrivers;
                 cin >> numOfDrivers;
                 for(int i =0  ; i < numOfDrivers; i++){
                     //receive the driver
                     ThreadClient* threadHandler = new ThreadClient(socket, this);
                     threadHandler->clientDescriptor = threadHandler->sock->acceptOneClient();
 
-                    cout<<"mainflow - sever accepted client!"<<endl;
+                    cout<<"mainflow - server accepted client!"<<endl;
                     pthread_create(&threads[i], NULL, connectionHandler, threadHandler);
                 }
                 break;
@@ -298,8 +307,9 @@ void MainFlow::mainFlow(int portNum){
                 this->getTaxiCenter()->startDriving();
                 Driver* driver = this->myTaxiCenter->getDriverById(0);
                 //int thereIsTrip = checkIfTimeToTrip(time);
-                if(thereIsTrip!=-1){
-                     }
+                for(int i=0;i<numOfDrivers;i++){
+                    queuesArray[i].push(mission);
+                }
                 break;
             }
         }

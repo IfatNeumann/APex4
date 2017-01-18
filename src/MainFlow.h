@@ -16,12 +16,17 @@
 #include "StandardCab.h"
 #include "LuxuryCab.h"
 #include <pthread.h>
+#include "ThreadClient.h"
+#include "../sockets/Tcp.h"
+
+
 class MainFlow {
 private:
     TaxiCenter* myTaxiCenter;
     Grid* grid;
     vector<Cab*> cabsVector;
     pthread_t threads[];
+    queue<int> queuesArray[];
     friend class boost::serialization::access;
 
     template<class Archive>
@@ -97,5 +102,8 @@ public:
     Grid* getGrid();
     int checkIfTimeToTrip(int time);
     void mainFlow(int portNum);
+    queue<int> getQueuesArray(int i){
+        return queuesArray[i];
+    }
 };
 #endif //APEX2_MAINFLOW_H

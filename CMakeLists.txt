@@ -14,7 +14,7 @@ set(SOURCE_FILES_CLIENT src/Client.h src/Client.cpp src/Point.h src/Point.cpp sr
         src/Grid.cpp src/Grid.h src/Driver.cpp src/Driver.h src/Passenger.h src/Passenger.cpp
         src/TripInfo.h src/TripInfo.cpp src/TaxiCenter.h src/TaxiCenter.cpp src/Cab.h src/Cab.cpp
         src/StandardCab.h src/StandardCab.cpp src/LuxuryCab.h src/LuxuryCab.cpp src/MainFlow.h
-        src/MainFlow.cpp src/Color.h src/Manufacturer.h src/MaritalStatus.h)
+        src/MainFlow.cpp src/Color.h src/Manufacturer.h src/MaritalStatus.h src/ThreadClient.cpp src/ThreadClient.h)
 
 set(SOURCE_FILES_SERVER src/Server.cpp src/Point.h src/Point.cpp src/BFS.cpp src/BFS.h src/Node.cpp src/Node.h
         src/Grid.cpp src/Grid.h src/Driver.cpp src/Driver.h src/Passenger.h src/Passenger.cpp
