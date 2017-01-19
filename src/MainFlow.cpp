@@ -13,12 +13,14 @@ vector<bool> boolVector;
 class ThreadClient{
 public:
     Tcp* sock;
+    TaxiCenter* tcenter;
     MainFlow* flow;
     int clientDescriptor;
-    ThreadClient(Tcp* s, MainFlow* f){
+    ThreadClient(Tcp* s, MainFlow* f,TaxiCenter* taxicenter){
         this->sock = s;
         this->flow = f;
         this->clientDescriptor;
+        this->tcenter=taxicenter;
     }
     ~ThreadClient(){}
 };
@@ -81,7 +83,7 @@ void *connectionHandler(void *socket_desc) {
     ih >> driver;
     BOOST_LOG_TRIVIAL(debug)<<"**thread - received driver with taxi from client!**"<<endl;
     driver->setClientDescriptor(handler->clientDescriptor);
-    handler->flow->getTaxiCenter()->addDriver(driver);
+    handler->tcenter->addDriver(driver);
     //driver->setMyTripInfo(NULL);
     //handler->flow->setBoolVectorAt(driver->getId(),true);
 
@@ -93,7 +95,8 @@ void *connectionHandler(void *socket_desc) {
             case (10): {
                 //BOOST_LOG_TRIVIAL(debug)<<"**thread - hi!!**"<<endl;
                 //if there is a trip
-
+                BOOST_LOG_TRIVIAL(debug)<<curr_time<<" = id!"<<endl;
+                BOOST_LOG_TRIVIAL(debug)<<curr_time<<" = time!"<<endl;
                 //BOOST_LOG_TRIVIAL(debug)<<"**thread - changed to false!**"<<endl;
                 //handler->flow->setBoolVectorAt(driver->getId(),false);
                     //initialize the trip's information
@@ -101,12 +104,15 @@ void *connectionHandler(void *socket_desc) {
                     //BOOST_LOG_TRIVIAL(debug)<<"therIsTrip "<<thereIsTrip<<endl;
                     //BOOST_LOG_TRIVIAL(debug)<<"time "<<handler->flow->getTime()<<endl;
                 //driver->getMyTripInfo()->getStartingP()->getPoint().printPoint();
-                    handler->flow->getTaxiCenter()->startDriving(driver->getId());
+                    handler->tcenter->startDriving(driver->getId());
                     //a trip needs to start
+                    BOOST_LOG_TRIVIAL(debug)<<thereIsTrip<<" = thereistrip!"<<endl;
                     if (thereIsTrip!=-1){
                         BOOST_LOG_TRIVIAL(debug) << "thread - we got a trip!" << endl;
+                        driver->getMyTripInfo()->getEndingP()->getPoint().printPoint();
+                        BOOST_LOG_TRIVIAL(debug)<<handler->tcenter->getTripsVector().size()<<"trip test"<<endl;
                         //find destPoint
-                        Node *destPoint = handler->flow->getTaxiCenter()->getTripsVector().at(thereIsTrip)
+                        Node *destPoint = handler->tcenter->getTripsVector().at(thereIsTrip)
                                 ->getEndingP();
                         //sent the destination point case number
                         handler->sock->sendData("4", driver->getClientDescriptor());
@@ -120,13 +126,17 @@ void *connectionHandler(void *socket_desc) {
                         oc << destPoint;
                         BOOST_LOG_TRIVIAL(debug)<<"thread - sent dest point!"<<endl;
                         s4.flush();
+                        BOOST_LOG_TRIVIAL(debug)<<thereIsTrip<<" = thread - 0!"<<endl;
                         handler->sock->sendData(serial_str3, driver->getClientDescriptor());
-                        thereIsTrip=true;
+                        BOOST_LOG_TRIVIAL(debug)<<thereIsTrip<<" = thread - 1!"<<endl;
                         //sent the tripInfo case number
                         handler->sock->sendData("3",driver->getClientDescriptor());
+                        BOOST_LOG_TRIVIAL(debug)<<thereIsTrip<<" = thread - 2!"<<endl;
+                        BOOST_LOG_TRIVIAL(debug)<<handler->tcenter->getTripsVector().size()<<"trip test"<<endl;
                         //find the trip info
-                        TripInfo* tripInfo = handler->flow->getTaxiCenter()->getTripsVector().at(thereIsTrip);
-
+                        TripInfo* tripInfo = handler->tcenter->getTripsVector().at(thereIsTrip);
+                        BOOST_LOG_TRIVIAL(debug)<<handler->tcenter->getTripsVector().size()<<"trip test"<<endl;
+                        BOOST_LOG_TRIVIAL(debug)<<"thread - 3!"<<endl;
                         //send the tripInfo
                         std::string serial_str2;
                         boost::iostreams::back_insert_device<std::string> inserter2(serial_str2);
@@ -141,7 +151,11 @@ void *connectionHandler(void *socket_desc) {
 
                     //send new location (Node*)
                     Node *newLocation = driver->getCurrentPoint();
+                    BOOST_LOG_TRIVIAL(debug)  <<"thread - new" << endl;
+                    newLocation->getPoint().printPoint();
                     //in case of a change in the location
+                    BOOST_LOG_TRIVIAL(debug)  <<"thread - curr" << endl;
+                    currentPoint->getPoint().printPoint();
                     if (currentPoint != newLocation) {
                         //sent the new location case number
                         BOOST_LOG_TRIVIAL(debug) << "thread - send new location case number" << endl;
@@ -231,14 +245,24 @@ Cab* MainFlow::getCab(int texiId) {
 }
 
 int MainFlow::checkIfTimeToTrip(int time,int driverId){
+    BOOST_LOG_TRIVIAL(debug)<<this->myTaxiCenter->getTripsVector().size()<<" = tripsvector"<<endl;
+    this->myTaxiCenter->getTripsVector().at(0)->getEndingP()
+                ->getPoint().printPoint();
+    BOOST_LOG_TRIVIAL(debug)<<this->myTaxiCenter->getTripsVector().at(0)->getHaveDriver()
+                            <<" = havedriver"<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<this->myTaxiCenter->getTripsVector().at(0)->getTimeOfStart()
+                            <<" = timeofstart"<<endl;
+
     for(int i=0; i<this->myTaxiCenter->getTripsVector().size();i++) {
         if(this->myTaxiCenter->getTripsVector().at(i)!=NULL&&
                 this->myTaxiCenter->getTripsVector().at(i)->getTimeOfStart()==time&&
                 this->myTaxiCenter->getTripsVector().at(i)->getHaveDriver()== false){
             this->myTaxiCenter->connectDriversToTrips(i,driverId);
+            BOOST_LOG_TRIVIAL(debug)<<i<<" = return i!"<<endl;
             return i;
         }
     }
+    BOOST_LOG_TRIVIAL(debug)<<curr_time<<" = return-1!"<<endl;
     return -1;
 }
 
@@ -274,7 +298,7 @@ void MainFlow::mainFlow(int portNum){
                 cin >> numOfDrivers;
                 for(int i =0  ; i < numOfDrivers; i++){
                     //receive the driver
-                    ThreadClient* threadHandler = new ThreadClient(socket, this);
+                    ThreadClient* threadHandler = new ThreadClient(socket, this,this->myTaxiCenter);
                     boolVector.push_back(true);
                     threadHandler->clientDescriptor = threadHandler->sock->acceptOneClient();
                     BOOST_LOG_TRIVIAL(debug)<<"mainflow - server accepted client!"<<endl;
@@ -323,7 +347,7 @@ void MainFlow::mainFlow(int portNum){
                 while (!this->finish()) { /*cout<< "ifat is right"<<endl; */ }
                 //waiting for all the threads
                 //this->mission = 10;
-                ///mainBool=false;
+                //mainBool=false;
                 /*while(mainBool==false){
                     mainBool=setMainBool();
                 }*/
