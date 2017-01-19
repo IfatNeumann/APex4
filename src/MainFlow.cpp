@@ -31,6 +31,7 @@ public:
 void *connectionHandler(void *socket_desc) {
     ThreadClient* handler = (ThreadClient*)socket_desc;
     char buffer[4096];
+    int oldTime;
     memset(buffer,0,sizeof(buffer));
     int dataSize = handler->sock->reciveData(buffer, 4096,handler->clientDescriptor);
     BOOST_LOG_TRIVIAL(debug)<<"**thread - received driver data from client!**"<<endl;
@@ -87,93 +88,90 @@ void *connectionHandler(void *socket_desc) {
     //driver->setMyTripInfo(NULL);
     //handler->flow->setBoolVectorAt(driver->getId(),true);
 
+    oldTime = 0;
     while (handler->flow->getMission()!=7) {
-        //handler->flow->setBoolVectorAt(driver->getId(),true);
+        boolVector[driver->getId()]=true;
+        if(oldTime==curr_time-1){
+            BOOST_LOG_TRIVIAL(debug)<<oldTime<<"oldtime!**"<<endl;
+            BOOST_LOG_TRIVIAL(debug) <<curr_time<< "curTime!" << endl;
+            switch (handler->flow->getMission()) {
+            case (9): {
+                //if time has passed
+                boolVector[driver->getId()] = false;
+                //initialize the trip's information
+                int thereIsTrip = handler->flow->checkIfTimeToTrip(curr_time, driver->getId());
+                handler->tcenter->startDriving(driver->getId());
+                //a trip needs to start
+                if (thereIsTrip != -1) {
+                    BOOST_LOG_TRIVIAL(debug) << "thread - we got a trip!" << endl;
+                    driver->getMyTripInfo()->getEndingP()->getPoint().printPoint();
+                    BOOST_LOG_TRIVIAL(debug) << handler->tcenter->getTripsVector().size() << "trip test" << endl;
+                    //find destPoint
+                    Node *destPoint = handler->tcenter->getTripsVector().at(thereIsTrip)
+                            ->getEndingP();
+                    //sent the destination point case number
+                    handler->sock->sendData("4", driver->getClientDescriptor());
+                    //send the destination point
 
-        //BOOST_LOG_TRIVIAL(debug)<<"**thread - changed to true!**"<<endl;
-        switch (handler->flow->getMission()) {
-            case (10): {
-                //BOOST_LOG_TRIVIAL(debug)<<"**thread - hi!!**"<<endl;
-                //if there is a trip
-                BOOST_LOG_TRIVIAL(debug)<<curr_time<<" = id!"<<endl;
-                BOOST_LOG_TRIVIAL(debug)<<curr_time<<" = time!"<<endl;
-                //BOOST_LOG_TRIVIAL(debug)<<"**thread - changed to false!**"<<endl;
-                //handler->flow->setBoolVectorAt(driver->getId(),false);
-                    //initialize the trip's information
-                    int thereIsTrip = handler->flow->checkIfTimeToTrip(curr_time,driver->getId());
-                    //BOOST_LOG_TRIVIAL(debug)<<"therIsTrip "<<thereIsTrip<<endl;
-                    //BOOST_LOG_TRIVIAL(debug)<<"time "<<handler->flow->getTime()<<endl;
-                //driver->getMyTripInfo()->getStartingP()->getPoint().printPoint();
-                    handler->tcenter->startDriving(driver->getId());
-                    //a trip needs to start
-                    BOOST_LOG_TRIVIAL(debug)<<thereIsTrip<<" = thereistrip!"<<endl;
-                    if (thereIsTrip!=-1){
-                        BOOST_LOG_TRIVIAL(debug) << "thread - we got a trip!" << endl;
-                        driver->getMyTripInfo()->getEndingP()->getPoint().printPoint();
-                        BOOST_LOG_TRIVIAL(debug)<<handler->tcenter->getTripsVector().size()<<"trip test"<<endl;
-                        //find destPoint
-                        Node *destPoint = handler->tcenter->getTripsVector().at(thereIsTrip)
-                                ->getEndingP();
-                        //sent the destination point case number
-                        handler->sock->sendData("4", driver->getClientDescriptor());
-                        //send the destination point
-
-                        std::string serial_str3;
-                        boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
-                        boost::iostreams::stream<boost::iostreams::back_insert_device
-                                <std::string> > s4(inserter3);
-                        boost::archive::binary_oarchive oc(s4);
-                        oc << destPoint;
-                        BOOST_LOG_TRIVIAL(debug)<<"thread - sent dest point!"<<endl;
-                        s4.flush();
-                        BOOST_LOG_TRIVIAL(debug)<<thereIsTrip<<" = thread - 0!"<<endl;
-                        handler->sock->sendData(serial_str3, driver->getClientDescriptor());
-                        BOOST_LOG_TRIVIAL(debug)<<thereIsTrip<<" = thread - 1!"<<endl;
-                        //sent the tripInfo case number
-                        handler->sock->sendData("3",driver->getClientDescriptor());
-                        BOOST_LOG_TRIVIAL(debug)<<thereIsTrip<<" = thread - 2!"<<endl;
-                        BOOST_LOG_TRIVIAL(debug)<<handler->tcenter->getTripsVector().size()<<"trip test"<<endl;
-                        //find the trip info
-                        TripInfo* tripInfo = handler->tcenter->getTripsVector().at(thereIsTrip);
-                        BOOST_LOG_TRIVIAL(debug)<<handler->tcenter->getTripsVector().size()<<"trip test"<<endl;
-                        BOOST_LOG_TRIVIAL(debug)<<"thread - 3!"<<endl;
-                        //send the tripInfo
-                        std::string serial_str2;
-                        boost::iostreams::back_insert_device<std::string> inserter2(serial_str2);
-                        boost::iostreams::stream<boost::iostreams::back_insert_device
-                                <std::string> > s3(inserter2);
-                        boost::archive::binary_oarchive ob(s3);
-                        ob << tripInfo;
-                        BOOST_LOG_TRIVIAL(debug)<<"thread - send trip info!"<<endl;
-                        s3.flush();
-                        handler->sock->sendData(serial_str2,driver->getClientDescriptor());
-                    }
-
-                    //send new location (Node*)
-                    Node *newLocation = driver->getCurrentPoint();
-                    BOOST_LOG_TRIVIAL(debug)  <<"thread - new" << endl;
-                    newLocation->getPoint().printPoint();
-                    //in case of a change in the location
-                    BOOST_LOG_TRIVIAL(debug)  <<"thread - curr" << endl;
-                    currentPoint->getPoint().printPoint();
-                    if (currentPoint != newLocation) {
-                        //sent the new location case number
-                        BOOST_LOG_TRIVIAL(debug) << "thread - send new location case number" << endl;
-                        handler->sock->sendData("5", driver->getClientDescriptor());
-                        std::string serial_str4;
-                        boost::iostreams::back_insert_device<std::string> inserter4(serial_str4);
-                        boost::iostreams::stream<boost::iostreams::back_insert_device
-                                <std::string> > s5(inserter4);
-                        boost::archive::binary_oarchive od(s5);
-                        od << newLocation;
-                        s5.flush();
-
-                        BOOST_LOG_TRIVIAL(debug) << "thread - send the new location!" << endl;
-                        handler->sock->sendData(serial_str4, driver->getClientDescriptor());
-                        //update (local) current point
-                        currentPoint = newLocation;
-                    }
+                    std::string serial_str3;
+                    boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
+                    boost::iostreams::stream<boost::iostreams::back_insert_device
+                            <std::string> > s4(inserter3);
+                    boost::archive::binary_oarchive oc(s4);
+                    oc << destPoint;
+                    BOOST_LOG_TRIVIAL(debug) << "thread - sent dest point!" << endl;
+                    s4.flush();
+                    BOOST_LOG_TRIVIAL(debug) << thereIsTrip << " = thread - 0!" << endl;
+                    handler->sock->sendData(serial_str3, driver->getClientDescriptor());
+                    BOOST_LOG_TRIVIAL(debug) << thereIsTrip << " = thread - 1!" << endl;
+                    //sent the tripInfo case number
+                    handler->sock->sendData("3", driver->getClientDescriptor());
+                    BOOST_LOG_TRIVIAL(debug) << thereIsTrip << " = thread - 2!" << endl;
+                    BOOST_LOG_TRIVIAL(debug) << handler->tcenter->getTripsVector().size() << "trip test" << endl;
+                    //find the trip info
+                    TripInfo *tripInfo = handler->tcenter->getTripsVector().at(thereIsTrip);
+                    BOOST_LOG_TRIVIAL(debug) << handler->tcenter->getTripsVector().size() << "trip test" << endl;
+                    BOOST_LOG_TRIVIAL(debug) << "thread - 3!" << endl;
+                    //send the tripInfo
+                    std::string serial_str2;
+                    boost::iostreams::back_insert_device<std::string> inserter2(serial_str2);
+                    boost::iostreams::stream<boost::iostreams::back_insert_device
+                            <std::string> > s3(inserter2);
+                    boost::archive::binary_oarchive ob(s3);
+                    ob << tripInfo;
+                    BOOST_LOG_TRIVIAL(debug) << "thread - send trip info!" << endl;
+                    s3.flush();
+                    handler->sock->sendData(serial_str2, driver->getClientDescriptor());
                 }
+
+                //send new location (Node*)
+                Node *newLocation = driver->getCurrentPoint();
+//                    BOOST_LOG_TRIVIAL(debug)  <<"thread - new" << endl;
+//                    newLocation->getPoint().printPoint();
+//                    //in case of a change in the location
+//                    BOOST_LOG_TRIVIAL(debug)  <<"thread - curr" << endl;
+//                    currentPoint->getPoint().printPoint();
+                if (currentPoint != newLocation) {
+                    //sent the new location case number
+                    BOOST_LOG_TRIVIAL(debug) << "thread - send new location case number" << endl;
+                    handler->sock->sendData("5", driver->getClientDescriptor());
+                    std::string serial_str4;
+                    boost::iostreams::back_insert_device<std::string> inserter4(serial_str4);
+                    boost::iostreams::stream<boost::iostreams::back_insert_device
+                            <std::string> > s5(inserter4);
+                    boost::archive::binary_oarchive od(s5);
+                    od << newLocation;
+                    s5.flush();
+
+                    BOOST_LOG_TRIVIAL(debug) << "thread - send the new location!" << endl;
+                    handler->sock->sendData(serial_str4, driver->getClientDescriptor());
+                    //update (local) current point
+                    currentPoint = newLocation;
+                    newLocation->getPoint().printPoint();
+                }
+            }
+                }
+            oldTime++;
             }
 
     }
@@ -245,24 +243,14 @@ Cab* MainFlow::getCab(int texiId) {
 }
 
 int MainFlow::checkIfTimeToTrip(int time,int driverId){
-    BOOST_LOG_TRIVIAL(debug)<<this->myTaxiCenter->getTripsVector().size()<<" = tripsvector"<<endl;
-    this->myTaxiCenter->getTripsVector().at(0)->getEndingP()
-                ->getPoint().printPoint();
-    BOOST_LOG_TRIVIAL(debug)<<this->myTaxiCenter->getTripsVector().at(0)->getHaveDriver()
-                            <<" = havedriver"<<endl;
-    BOOST_LOG_TRIVIAL(debug)<<this->myTaxiCenter->getTripsVector().at(0)->getTimeOfStart()
-                            <<" = timeofstart"<<endl;
-
     for(int i=0; i<this->myTaxiCenter->getTripsVector().size();i++) {
         if(this->myTaxiCenter->getTripsVector().at(i)!=NULL&&
                 this->myTaxiCenter->getTripsVector().at(i)->getTimeOfStart()==time&&
                 this->myTaxiCenter->getTripsVector().at(i)->getHaveDriver()== false){
             this->myTaxiCenter->connectDriversToTrips(i,driverId);
-            BOOST_LOG_TRIVIAL(debug)<<i<<" = return i!"<<endl;
             return i;
         }
     }
-    BOOST_LOG_TRIVIAL(debug)<<curr_time<<" = return-1!"<<endl;
     return -1;
 }
 
@@ -357,7 +345,6 @@ void MainFlow::mainFlow(int portNum){
                 for(int i = 0;i<boolVector.size();i++){
                     boolVector[i] = false;
                 }
-                this->mission = 10;
                 break;
             }
         }
@@ -383,7 +370,6 @@ bool MainFlow::setMainBool(){
 }
 
 bool MainFlow::finish(){
-    cout<<"size "<<boolVector.size()<<endl;
     for(int i=0; i<boolVector.size(); i++){
         if(boolVector[i] == false)
             return false;

@@ -75,8 +75,6 @@ void TaxiCenter::updateDriverPassengers(Driver* closestTaxi, Node* costmSource, 
 }
 
 void TaxiCenter::connectDriversToTrips(int indexOfTrip,int driverId){
-    cout<<driverId<<" connectDriversToTrips= id!"<<endl;
-    cout<<indexOfTrip<<"connectDriversToTrips = trip!"<<endl;
             int indexOfDriver = srcClosestTaxiDriver(indexOfTrip,driverId);
             if (indexOfDriver != -1) {
                 this->driversList[indexOfDriver]->setMyTripInfo(this->tripsList[indexOfTrip]);
