@@ -175,8 +175,6 @@ void *connectionHandler(void *socket_desc) {
             }
 
     }
-    BOOST_LOG_TRIVIAL(debug)<<"thread - print taxi id!"<<endl;
-    BOOST_LOG_TRIVIAL(debug)<<driver->getTaxiId()<<endl;
     BOOST_LOG_TRIVIAL(debug)<<"thread - bye bye thread"<<endl;
     pthread_exit(socket_desc);
 }
@@ -332,13 +330,8 @@ void MainFlow::mainFlow(int portNum){
             case 9: {
                 cout<<"time before++"<<curr_time<<endl;
                 int i;
-                while (!this->finish()) { /*cout<< "ifat is right"<<endl; */ }
                 //waiting for all the threads
-                //this->mission = 10;
-                //mainBool=false;
-                /*while(mainBool==false){
-                    mainBool=setMainBool();
-                }*/
+                while (!this->finish()) { }
                 BOOST_LOG_TRIVIAL(debug)<<"mainflow - case9!" << endl;
                 curr_time++;
                 cout<<"time after++"<<curr_time<<endl;
