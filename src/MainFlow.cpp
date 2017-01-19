@@ -40,16 +40,14 @@ void *connectionHandler(void *socket_desc) {
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
     boost::archive::binary_iarchive ia(s2);
     ia >> driver;
-    cout<<driver->getId()<<endl;
-    cout<<driver->getAge()<<endl;
-    cout <<"zise before set"<< boolVector.size()<<endl;
     driver->setCurrentPoint(handler->flow->getGrid()->getNode(Point(0,0)));
     Node* currentPoint=driver->getCurrentPoint();
     //find the taxi
 
     BOOST_LOG_TRIVIAL(debug)<<"thread - find the right taxi!"<<endl;
     Cab* taxi = handler->flow->getCab(driver->getTaxiId());
-
+    BOOST_LOG_TRIVIAL(debug)<<"**thread - taxivector:";
+    BOOST_LOG_TRIVIAL(debug)<<handler->flow->getCabsVector().size()<<endl;
     //send the taxi case number
 
     BOOST_LOG_TRIVIAL(debug)<<"**thread - send 2!**"<<endl;
@@ -61,10 +59,13 @@ void *connectionHandler(void *socket_desc) {
     boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
     boost::archive::binary_oarchive oa(s);
     oa << taxi;
+    BOOST_LOG_TRIVIAL(debug)<<serial_str<<endl;
     s.flush();
-    cout<<serial_str<<endl;
     handler->sock->sendData(serial_str,handler->clientDescriptor);
     BOOST_LOG_TRIVIAL(debug)<<"**thread - send taxi!**"<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<"**thread - taxi:";
+    BOOST_LOG_TRIVIAL(debug)<<serial_str<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<taxi->getTariffCoefficient()<<endl;
     //serialize and send current point
     std::string serial_str3;
     boost::iostreams::back_insert_device<std::string> inserter3(serial_str3);
@@ -167,6 +168,7 @@ void *connectionHandler(void *socket_desc) {
                     handler->sock->sendData(serial_str4, driver->getClientDescriptor());
                     //update (local) current point
                     currentPoint = newLocation;
+                    BOOST_LOG_TRIVIAL(debug) << "thread - new location:";
                     newLocation->getPoint().printPoint();
                 }
             }
@@ -260,8 +262,6 @@ void MainFlow::mainFlow(int portNum){
     char buffer[4096];
     Tcp* socket= new Tcp(true,portNum);
     socket->initialize();
-    cout<<"time in initialize"<<curr_time<<endl;
-    cout<<"size in initialize"<<boolVector.size()<<endl;
     //entered the size of the grid (map)
     cin >> gridXAxe >> gridYAxe;
     this->createGrid(gridXAxe,gridYAxe);
@@ -275,8 +275,6 @@ void MainFlow::mainFlow(int portNum){
     }
     int numOfDrivers=0;
     do{
-
-        cout<<"time in dowhile loop"<<curr_time<<endl;
         cin>>this->mission;
         switch (this->mission) {
             //this mission is for creating and adding a new driver to the game
@@ -288,11 +286,8 @@ void MainFlow::mainFlow(int portNum){
                     boolVector.push_back(true);
                     threadHandler->clientDescriptor = threadHandler->sock->acceptOneClient();
                     BOOST_LOG_TRIVIAL(debug)<<"mainflow - server accepted client!"<<endl;
-                    cout<<"time afterpush3"<<curr_time<<endl;
                     pthread_create(&threads[i], NULL, connectionHandler, threadHandler);
-                    cout<<"time afterpush4"<<curr_time<<endl;
                 }
-                cout<<"time after push after loop "<<curr_time<<endl;
                 break;
             }
                 //this mission is for creating and adding a new trip to the game
@@ -322,19 +317,18 @@ void MainFlow::mainFlow(int portNum){
                 int idToGet;
                 cin >> idToGet;
                 Driver *driverCurrentPoint = this->getTaxiCenter()->getDriverById(idToGet);
+                BOOST_LOG_TRIVIAL(debug)<<"mainflow - current point is:";
                 Node *currentPoint = driverCurrentPoint->getCurrentPoint();
                 currentPoint->getPoint().printPoint();
                 break;
             }
             //this mission increase the time by one
             case 9: {
-                cout<<"time before++"<<curr_time<<endl;
                 int i;
                 //waiting for all the threads
                 while (!this->finish()) { }
                 BOOST_LOG_TRIVIAL(debug)<<"mainflow - case9!" << endl;
                 curr_time++;
-                cout<<"time after++"<<curr_time<<endl;
                 for(int i = 0;i<boolVector.size();i++){
                     boolVector[i] = false;
                 }
@@ -346,20 +340,12 @@ void MainFlow::mainFlow(int portNum){
     Driver* driver = this->myTaxiCenter->getDriverById(0);
     //sent the delete case number
     socket->sendData("7",driver->getClientDescriptor());
+    pthread_join(threads[0],NULL);
+    BOOST_LOG_TRIVIAL(debug)<<"mainflow-byebye!";
 }
 
-//void MainFlow::setBoolVectorAt(int i,bool state){
-//    boolVector[i]=state;
-//}
 int MainFlow::getMission(){
     return this->mission;
-}
-bool MainFlow::setMainBool(){
-    for(int i=0;i<boolVector.size();i++) {
-        if (boolVector[i] == false)
-            return false;
-    }
-    return true;
 }
 
 bool MainFlow::finish(){

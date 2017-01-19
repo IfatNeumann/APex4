@@ -26,6 +26,8 @@ private:
     int timeOfStart;
     bool tripJustStart;
     std::stack<Point> myWay;
+    bool doneToCalculate;
+    pthread_t myThread;
     friend class boost::serialization::access;
 
     template<class Archive>
@@ -39,18 +41,20 @@ private:
         ar & tariff;
         ar & haveDriver;
         ar & timeOfStart;
+        ar & tripJustStart;
+        //ar & myWay;
     }
 
 public:
     TripInfo();
- /**
-  * Constructor.
-  * @param rideId the id of this ride (trip)
-  * @param startingP the trip's start point
-  * @param endingP the trip's end point
-  * @param numOfPassen the number of the passengers in this trip
-  * @param tariff the tariff to this trip
-  */
+    /**
+     * Constructor.
+     * @param rideId the id of this ride (trip)
+     * @param startingP the trip's start point
+     * @param endingP the trip's end point
+     * @param numOfPassen the number of the passengers in this trip
+     * @param tariff the tariff to this trip
+     */
     TripInfo(int rideId, Node *startingP, Node *endingP, int numOfPassen, double tariff, int timeOfStart);
 
     /**
@@ -100,6 +104,8 @@ public:
     void setHaveDriver(bool haveOrNot);
     void setTripJustStart(bool startOrNot);
     void setMyWay(stack<Point> tripWay);
+    void setDoneToCal(bool doneOrNot);
+    void setThread(pthread_t theard);
     /**
      * This function returns the ride's id.
      * @return variable from type int
@@ -143,6 +149,8 @@ public:
     int getTimeOfStart();
     bool getTripJustStart();
     Point getNextPoint(int stanOrLux);
+    bool getDoneToCal();
+    pthread_t getThread();
 };
 
 

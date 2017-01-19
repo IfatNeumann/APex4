@@ -52,6 +52,12 @@ void TripInfo::setMyWay(stack<Point> tripWay) {
 
     myWay.pop();
 }
+void TripInfo::setDoneToCal(bool doneOrNot){
+   this->doneToCalculate=doneOrNot;
+}
+void TripInfo::setThread(pthread_t thread){
+    this->myThread = thread;
+}
 int TripInfo::getRideId(){
     return this->rideId;
 }
@@ -101,3 +107,9 @@ Point TripInfo::getNextPoint(int stanOrLux){
     return current;
 }
 
+bool TripInfo::getDoneToCal(){
+    return doneToCalculate;
+}
+pthread_t TripInfo::getThread(){
+    return this->myThread;
+}

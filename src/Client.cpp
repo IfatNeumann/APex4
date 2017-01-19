@@ -34,7 +34,6 @@ int main(int argc,char* argv[]) {
     s.flush();
     socket->sendData(serial_str,0);
     BOOST_LOG_TRIVIAL(debug)<<"client sent driver!"<<endl;
-    BOOST_LOG_TRIVIAL(debug)<<buffer<<endl;
     do {
         //receive mission number
         memset(buffer,0,4096);
@@ -45,16 +44,17 @@ int main(int argc,char* argv[]) {
         switch(missionNum) {
             //receive taxi
             case (2): {
-                cout << "BREAK1!" << endl;
                 memset(buffer,0,4096);
                 dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device(buffer, dataSize);
+                cout << "BREAK1!" << endl;
+                cout << buffer << endl;
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
                 boost::archive::binary_iarchive ia(s2);
                 ia >> taxi;
                 BOOST_LOG_TRIVIAL(debug)<<"client received taxi!"<<endl;
                 driver->setTxCabInfo(taxi);
-    		cout << "BREAK2!" << endl;
+    		    cout << "BREAK2!" << endl;
                 //receiving the current point
                 memset(buffer,0,sizeof(buffer));
                 dataSize = socket->reciveData(buffer, 4096,0);
@@ -62,7 +62,7 @@ int main(int argc,char* argv[]) {
                 boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s4(device3);
                 boost::archive::binary_iarchive ic(s4);
                 ic >> currentPoint;
-                BOOST_LOG_TRIVIAL(debug)<<"client received current point!"<<endl;
+                BOOST_LOG_TRIVIAL(debug)<<"client received current point:"<<endl;
                 currentPoint->getPoint().printPoint();
                 driver->setCurrentPoint(currentPoint);
                 //send driver *with* his taxi
@@ -78,6 +78,7 @@ int main(int argc,char* argv[]) {
             }
                 //receive tripInfo
             case (3): {
+                BOOST_LOG_TRIVIAL(debug)<<"client receive trip info!"<<endl;
                 memset(buffer,0,sizeof(buffer));
                 dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device2(buffer, dataSize);
@@ -92,6 +93,7 @@ int main(int argc,char* argv[]) {
             }
                 //receive destination point
             case (4): {
+                BOOST_LOG_TRIVIAL(debug)<<"client receive dest point!"<<endl;
                 memset(buffer,0,sizeof(buffer));
                 dataSize = socket->reciveData(buffer, 4096,0);
                 boost::iostreams::basic_array_source<char> device3(buffer, dataSize);
@@ -118,7 +120,7 @@ int main(int argc,char* argv[]) {
                 }
                 ie >> nextPoint;
                 driver->setCurrentPoint(nextPoint);
-                BOOST_LOG_TRIVIAL(debug)<<"client -print point!"<<endl;
+                BOOST_LOG_TRIVIAL(debug)<<"client -print point:"<<endl;
                 nextPoint->getPoint().printPoint();
                 if((endPoint!=NULL)&&(driver->getCurrentPoint()->getPoint().isEqualTo(endPoint->getPoint()))){
                     driver->setMyTripInfo(NULL);
@@ -127,6 +129,7 @@ int main(int argc,char* argv[]) {
             }
                 //delete
             case (7): {
+                BOOST_LOG_TRIVIAL(debug)<<"client - delete"<<endl;
                 delete endPoint;
                 delete currentPoint;
                 delete nextPoint;
