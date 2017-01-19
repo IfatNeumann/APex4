@@ -16,6 +16,7 @@ public:
     TaxiCenter* tcenter;
     MainFlow* flow;
     int clientDescriptor;
+    pthread_mutex_t locker;
     ThreadClient(Tcp* s, MainFlow* f,TaxiCenter* taxicenter){
         this->sock = s;
         this->flow = f;
@@ -34,7 +35,9 @@ void *connectionHandler(void *socket_desc) {
     int oldTime;
     memset(buffer,0,sizeof(buffer));
     int dataSize = handler->sock->reciveData(buffer, 4096,handler->clientDescriptor);
-    BOOST_LOG_TRIVIAL(debug)<<"**thread - received driver data from client!**"<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<"thread - clientDescriptor:"<<handler->clientDescriptor;
+
+    BOOST_LOG_TRIVIAL(debug)<<"thread - received driver data from client!";
     Driver *driver;
     boost::iostreams::basic_array_source<char> device(buffer, dataSize);
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2(device);
@@ -42,27 +45,29 @@ void *connectionHandler(void *socket_desc) {
     ia >> driver;
     driver->setCurrentPoint(handler->flow->getGrid()->getNode(Point(0,0)));
     Node* currentPoint=driver->getCurrentPoint();
-    //find the taxi
 
     BOOST_LOG_TRIVIAL(debug)<<"thread - find the right taxi!"<<endl;
     Cab* taxi = handler->flow->getCab(driver->getTaxiId());
-    BOOST_LOG_TRIVIAL(debug)<<"**thread - taxivector:";
+    BOOST_LOG_TRIVIAL(debug)<<"**thread - taxi vector:";
     BOOST_LOG_TRIVIAL(debug)<<handler->flow->getCabsVector().size()<<endl;
     //send the taxi case number
 
     BOOST_LOG_TRIVIAL(debug)<<"**thread - send 2!**"<<endl;
     handler->sock->sendData("2",handler->clientDescriptor);
+    BOOST_LOG_TRIVIAL(debug)<<"receive between two sends:";
+    memset(buffer,0,4096);
+    handler->sock->reciveData(buffer, 4096,handler->clientDescriptor);
+    BOOST_LOG_TRIVIAL(debug)<<buffer;
     //send the taxi
-
     std::string serial_str;
     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
     boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
     boost::archive::binary_oarchive oa(s);
     oa << taxi;
-    BOOST_LOG_TRIVIAL(debug)<<serial_str<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<"taxi string print: "<<serial_str<<endl;
     s.flush();
     handler->sock->sendData(serial_str,handler->clientDescriptor);
-    BOOST_LOG_TRIVIAL(debug)<<"**thread - send taxi!**"<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<"**thread - sent taxi!**"<<endl;
     BOOST_LOG_TRIVIAL(debug)<<"**thread - taxi:";
     BOOST_LOG_TRIVIAL(debug)<<serial_str<<endl;
     BOOST_LOG_TRIVIAL(debug)<<taxi->getTariffCoefficient()<<endl;
@@ -85,7 +90,9 @@ void *connectionHandler(void *socket_desc) {
     ih >> driver;
     BOOST_LOG_TRIVIAL(debug)<<"**thread - received driver with taxi from client!**"<<endl;
     driver->setClientDescriptor(handler->clientDescriptor);
+    pthread_mutex_lock(&handler->locker);
     handler->tcenter->addDriver(driver);
+    pthread_mutex_unlock(&handler->locker);
     //driver->setMyTripInfo(NULL);
     //handler->flow->setBoolVectorAt(driver->getId(),true);
 
@@ -177,7 +184,7 @@ void *connectionHandler(void *socket_desc) {
             }
 
     }
-    BOOST_LOG_TRIVIAL(debug)<<"thread - bye bye thread"<<endl;
+    BOOST_LOG_TRIVIAL(debug)<<"number"<<driver->getClientDescriptor()<<"thread - bye bye thread"<<endl;
     pthread_exit(socket_desc);
 }
 
@@ -257,9 +264,8 @@ int MainFlow::checkIfTimeToTrip(int time,int driverId){
 void MainFlow::mainFlow(int portNum){
     int gridXAxe,gridYAxe,numOfObstacles;
     int xPoint,yPoint;
+    int numOfDrivers=0;
     char dummy;
-    bool mainBool=false;
-    char buffer[4096];
     Tcp* socket= new Tcp(true,portNum);
     socket->initialize();
     //entered the size of the grid (map)
@@ -273,7 +279,6 @@ void MainFlow::mainFlow(int portNum){
         this->getGrid()->getNode(Point(xPoint,yPoint))->setIsObstacle();
         numOfObstacles--;
     }
-    int numOfDrivers=0;
     do{
         cin>>this->mission;
         switch (this->mission) {
@@ -340,7 +345,8 @@ void MainFlow::mainFlow(int portNum){
     Driver* driver = this->myTaxiCenter->getDriverById(0);
     //sent the delete case number
     socket->sendData("7",driver->getClientDescriptor());
-    pthread_join(threads[0],NULL);
+    for (int i=0;i<numOfDrivers;i++)
+        pthread_join(threads[i],NULL);
     BOOST_LOG_TRIVIAL(debug)<<"mainflow-byebye!";
 }
 

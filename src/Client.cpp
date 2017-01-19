@@ -9,11 +9,10 @@ BOOST_CLASS_EXPORT_GUID(StandardCab,"StandardCab")
 BOOST_CLASS_EXPORT_GUID(LuxuryCab,"LuxuryCab")
 using namespace std;
 int main(int argc,char* argv[]) {
-    int id, age, experience, taxiId;
+    int id, age, experience, taxiId, missionNum, dataSize;
     string ip = argv[1];
     int portNum = atoi(argv[2]);
-    char status,dummy;
-    char buffer[4096];
+    char status,dummy, buffer[4096];
     Client client;
     Driver* driver;
     Cab* taxi;
@@ -21,11 +20,10 @@ int main(int argc,char* argv[]) {
     Tcp* socket= new Tcp(false,portNum);
     socket->initialize();
     BOOST_LOG_TRIVIAL(debug)<<"client initialized!"<<endl;
-    int missionNum;
-    int dataSize;
     Node *endPoint = NULL,*currentPoint, *nextPoint = NULL;
     cin >> id >> dummy >> age >> dummy >> status >> dummy >> experience >> dummy >> taxiId;
     driver = client.createDriver(id, age, status, experience, taxiId);
+
     std::string serial_str;
     boost::iostreams::back_insert_device<std::string> inserter(serial_str);
     boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
@@ -40,7 +38,10 @@ int main(int argc,char* argv[]) {
         dataSize = socket->reciveData(buffer, 4096,0);
         string missionNumString = string(buffer);
         missionNum = stoi(missionNumString);
-        cout<<missionNum<<endl;
+        BOOST_LOG_TRIVIAL(debug)<<"missionNum: "<<missionNum;
+
+        BOOST_LOG_TRIVIAL(debug)<<"send between two receives";
+        socket->sendData("accepted",0);
         switch(missionNum) {
             //receive taxi
             case (2): {
